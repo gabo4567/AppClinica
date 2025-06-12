@@ -89,7 +89,7 @@ fun MainScreen(onLogout: () -> Unit) {
                 when (selectedOption) {
                     MenuOption.DASHBOARD -> InicioScreen()
                     MenuOption.PACIENTES -> PacientesScreen()
-                    MenuOption.TURNOS -> Text("Gestión de Turnos")
+                    MenuOption.TURNOS -> TurnosScreen()
                     MenuOption.PROFESIONALES -> Text("Gestión de Profesionales")
                     MenuOption.ESPECIALIDADES -> Text("Gestión de Especialidades")
                     MenuOption.INFORMES -> Text("Pantalla de Informes")

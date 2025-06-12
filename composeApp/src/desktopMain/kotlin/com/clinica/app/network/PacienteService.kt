@@ -1,7 +1,6 @@
 package com.clinica.app.network
 
 import com.clinica.app.models.Paciente
-import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
