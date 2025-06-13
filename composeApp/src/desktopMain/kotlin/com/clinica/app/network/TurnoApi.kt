@@ -34,8 +34,7 @@ object TurnoApi {
 
     suspend fun cancelarTurno(turno: TurnoDTO): Boolean {
         val client = KtorClientConfig.config
-        // Crear una copia del turno con idEstado = 10 (Cancelado)
-        val turnoCancelado = turno.copy(idEstado = 10)
+        val turnoCancelado = turno.copy(idEstado = 11)
 
         val response: HttpResponse = client.put("http://localhost:8080/api/turnos/${turno.id}") {
             contentType(ContentType.Application.Json)

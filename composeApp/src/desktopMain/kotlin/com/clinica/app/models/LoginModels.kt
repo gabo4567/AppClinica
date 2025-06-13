@@ -4,11 +4,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class LoginRequestDTO(
-    val email: String,
-    val contrasenia: String
+    val nombreUsuario: String,
+    val contrasena: String
 )
 
 @Serializable
 data class LoginResponseDTO(
-    val message: String
+    val message: String? = null
 )

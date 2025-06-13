@@ -10,7 +10,6 @@ data class ProfesionalDTO(
     val nombre: String,
     val apellido: String,
     val email: String,
-    val contrasenia: String,
     val telefono: String,
     val direccion: String,
     @Contextual

@@ -14,8 +14,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(onLoginSuccess: (String) -> Unit) {
-    var email by remember { mutableStateOf("") }
-    var contrasenia by remember { mutableStateOf("") }
+    var nombreUsuario by remember { mutableStateOf("") }
+    var contrasena by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -35,17 +35,17 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
+                value = nombreUsuario,
+                onValueChange = { nombreUsuario = it },
+                label = { Text("Nombre de usuario") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
-                value = contrasenia,
-                onValueChange = { contrasenia = it },
+                value = contrasena,
+                onValueChange = { contrasena = it },
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation()
@@ -60,8 +60,8 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
 
                     CoroutineScope(Dispatchers.IO).launch {
                         try {
-                            val response = LoginService.loginSecretaria(email, contrasenia)
-                            onLoginSuccess(response.message)
+                            val response = LoginService.loginSecretaria(nombreUsuario, contrasena)
+                            onLoginSuccess(response.message ?: "Login exitoso")
                         } catch (e: Exception) {
                             errorMessage = "Login fallido: ${e.message}"
                             isLoading = false
@@ -69,7 +69,7 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                     }
                 },
                 enabled = !isLoading,
-                modifier = Modifier.width(200.dp) // Ancho reducido para el botón
+                modifier = Modifier.width(200.dp)
             ) {
                 Text("Iniciar sesión")
             }

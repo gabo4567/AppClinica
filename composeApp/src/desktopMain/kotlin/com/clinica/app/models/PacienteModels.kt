@@ -11,7 +11,6 @@ data class Persona(
     val email: String,
     val telefono: String,
     val direccion: String,
-    val contrasenia: String,
     val idRol: Long,
     val idEspecialidad: Long? = null,
     val idEstado: Long,

@@ -25,12 +25,13 @@ object LoginService {
         }
     }
 
-    suspend fun loginSecretaria(email: String, contrasenia: String): LoginResponseDTO {
-        val request = LoginRequestDTO(email, contrasenia)
+    suspend fun loginSecretaria(nombreUsuario: String, contrasena: String): LoginResponseDTO {
+        val request = LoginRequestDTO(nombreUsuario, contrasena)
 
         return client.post("$BASE_URL/secretaria") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
     }
+
 }
