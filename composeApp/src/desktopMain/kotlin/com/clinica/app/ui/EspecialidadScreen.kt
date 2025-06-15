@@ -19,11 +19,24 @@ import androidx.compose.runtime.Composable
 @Composable
 fun EspecialidadScreen() {
     val especialidades = listOf(
-        EspecialidadData("Clínica General", "Atención integral para todas las edades, con diagnóstico y tratamiento de enfermedades comunes."),
-        EspecialidadData("Pediatría", "Cuidado de la salud de bebés, niños y adolescentes."),
-        EspecialidadData("Ginecología", "Atención de la salud femenina, controles, embarazo y enfermedades específicas."),
-        EspecialidadData("Cardiología", "Diagnóstico y tratamiento de enfermedades del corazón y sistema circulatorio.")
+        EspecialidadData(
+            "Clínica General",
+            "Atención integral para pacientes de todas las edades. Se encarga de la prevención, diagnóstico y tratamiento de enfermedades comunes como gripes, infecciones, hipertensión, diabetes, entre otras. Es el primer nivel de consulta médica y deriva a especialistas cuando es necesario."
+        ),
+        EspecialidadData(
+            "Pediatría",
+            "Especialidad dedicada al cuidado de la salud de bebés, niños y adolescentes. Incluye controles de crecimiento y desarrollo, vacunación, tratamiento de enfermedades infantiles y orientación a los padres sobre hábitos saludables."
+        ),
+        EspecialidadData(
+            "Ginecología",
+            "Atención médica especializada en la salud del aparato reproductor femenino. Realiza controles ginecológicos, estudios como Papanicolaou y colposcopía, seguimiento del embarazo, y tratamiento de trastornos hormonales, menstruales o infecciones."
+        ),
+        EspecialidadData(
+            "Cardiología",
+            "Especialidad centrada en el diagnóstico, tratamiento y prevención de enfermedades cardiovasculares. Atiende afecciones como hipertensión, arritmias, insuficiencia cardíaca y enfermedades coronarias. Se realizan estudios como electrocardiogramas, ecocardiogramas y pruebas de esfuerzo."
+        )
     )
+
 
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),

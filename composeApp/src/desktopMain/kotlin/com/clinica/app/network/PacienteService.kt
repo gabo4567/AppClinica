@@ -21,6 +21,31 @@ object PacienteService {
         }
     }
 
+    suspend fun crearPaciente(dto: RegistroPacienteDTO): Paciente {
+        // Aseguramos que los valores fijos estén definidos
+        val dtoConValoresFijos = dto.copy(
+            idRol = 4L,             // rol paciente fijo
+            idEstadoPersona = 1L,   // estado persona activo
+            idEstadoPaciente = 1L   // estado paciente activo
+        )
+
+        val jsonString = Json { encodeDefaults = true }.encodeToString(dtoConValoresFijos)
+        println("📤 JSON enviado al backend:")
+        println(jsonString)
+
+        val response: HttpResponse = client.post("http://localhost:8080/api/pacientes") {
+            contentType(ContentType.Application.Json)
+            setBody(jsonString)
+        }
+
+        if (response.status == HttpStatusCode.Created || response.status == HttpStatusCode.OK) {
+            return response.body()
+        } else {
+            throw Exception("Error al crear paciente: ${response.status}")
+        }
+    }
+
+
     suspend fun actualizarPaciente(id: Long, dto: RegistroPacienteDTO): Paciente {
         // Asignar los valores fijos que faltan en el DTO antes de enviarlo
         val dtoConValoresFijos = dto.copy(
@@ -44,7 +69,6 @@ object PacienteService {
             throw Exception("Error al actualizar paciente: ${response.status}")
         }
     }
-
 
     suspend fun eliminarPaciente(id: Long) {
         println(">>> Enviando solicitud para eliminar paciente con ID: $id")

@@ -123,7 +123,7 @@ fun InicioScreen() {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp),
+                    .height(170.dp),
                 shape = RoundedCornerShape(12.dp),
                 elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD))
@@ -131,30 +131,51 @@ fun InicioScreen() {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
+                    // Dirección
                     Column(
-                        modifier = Modifier.padding(start = 100.dp),
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("Teléfono: (03722) 444-555", fontSize = 14.sp, color = Color.Black)
-                        Text("Dirección: Av. Salud 1234", fontSize = 14.sp, color = Color.Black)
-                        Text("Ciudad: Goya, Corrientes", fontSize = 14.sp, color = Color.Black)
+                        Text("Dirección", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0D47A1))
+                        Text("Calle fiticia 123", fontSize = 14.sp, color = Color.Black)
+                        Text("Goya, Corrientes", fontSize = 14.sp, color = Color.Black)
+                        Text("Argentina", fontSize = 14.sp, color = Color.Black)
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    // Contacto
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("Contacto", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF0D47A1))
+                        Text("Fijo: (03777) 123-456", fontSize = 14.sp, color = Color.Black)
+                        Text("Cel: +54 9 3777 654321", fontSize = 14.sp, color = Color.Black)
+                        Text("WhatsApp: +54 9 3777 654321", fontSize = 14.sp, color = Color.Black)
+                        Text("Email: contacto@clinicagoya.com", fontSize = 14.sp, color = Color.Black)
+                    }
 
-                    Text(
-                        "Horarios de atención: 7:30 - 12:30",
-                        fontSize = 14.sp,
-                        color = Color.Black,
-                        modifier = Modifier.padding(end = 200.dp)
-                    )
+                    // Horario de atención
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        Text(
+                            "Horario de atención",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF0D47A1),
+                            modifier = Modifier.padding(end = 24.dp) // Empuja el texto hacia la izquierda
+                        )
+                        Text("Lun a Vie: 7:30 - 12:30 / 16:00 - 18:00", fontSize = 14.sp, color = Color.Black)
+                        Text("Sáb, Dom y feriados: Cerrado", fontSize = 14.sp, color = Color.Black)
+                    }
                 }
-
             }
         }
+
     }
 }
 
