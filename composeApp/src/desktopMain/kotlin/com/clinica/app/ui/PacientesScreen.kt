@@ -45,6 +45,9 @@ fun PacientesScreen() {
     var eliminarErrorMessage by remember { mutableStateOf<String?>(null) }
     var isProcessingEliminar by remember { mutableStateOf(false) }
 
+    var pacienteAEliminar by remember { mutableStateOf<Paciente?>(null) }
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+
     // val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 
@@ -77,7 +80,6 @@ fun PacientesScreen() {
                 .fillMaxSize()
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp) // quité el padding top
         ) {
-            // SnackbarHost(hostState = snackbarHostState)
 
             Surface(
                 modifier = Modifier
@@ -194,6 +196,42 @@ fun PacientesScreen() {
                 PacientesHeader()
                 Spacer(modifier = Modifier.height(8.dp))
 
+                if (mostrarDialogoEliminar && pacienteAEliminar != null) {
+                    AlertDialog(
+                        onDismissRequest = { mostrarDialogoEliminar = false },
+                        title = { Text("Confirmar eliminación") },
+                        text = { Text("¿Estás seguro de que deseas eliminar al paciente?") },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                eliminarErrorMessage = null
+                                isProcessingEliminar = true
+                                mostrarDialogoEliminar = false
+                                coroutineScope.launch {
+                                    try {
+                                        PacienteService.eliminarPaciente(pacienteAEliminar!!.id)
+                                        cargarPacientes()
+                                    } catch (e: Exception) {
+                                        eliminarErrorMessage = "Error al eliminar paciente: ${e.message}"
+                                        e.printStackTrace()
+                                    } finally {
+                                        isProcessingEliminar = false
+                                    }
+                                }
+                            }) {
+                                Text("Confirmar", color = Color.Red)
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = {
+                                mostrarDialogoEliminar = false
+                                pacienteAEliminar = null
+                            }) {
+                                Text("Cancelar")
+                            }
+                        }
+                    )
+                }
+
                 LazyColumn {
                     items(pacientesFiltrados) { paciente ->
                         PacienteItem(
@@ -203,21 +241,8 @@ fun PacientesScreen() {
                                 editErrorMessage = null
                             },
                             onEliminarClick = {
-                                eliminarErrorMessage = null
-                                isProcessingEliminar = true
-                                coroutineScope.launch {
-                                    try {
-                                        // Aquí en vez de eliminar físicamente, cambiar estado a inactivo (idEstadoPaciente=2)
-                                        PacienteService.eliminarPaciente(it.id)
-                                        // Refrescar lista luego de "eliminar"
-                                        cargarPacientes()
-                                    } catch (e: Exception) {
-                                        eliminarErrorMessage = "Error al eliminar paciente: ${e.message}"
-                                        e.printStackTrace()
-                                    } finally {
-                                        isProcessingEliminar = false
-                                    }
-                                }
+                                pacienteAEliminar = it
+                                mostrarDialogoEliminar = true
                             }
                         )
                     }
