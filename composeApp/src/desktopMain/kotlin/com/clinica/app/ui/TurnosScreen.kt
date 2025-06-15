@@ -172,21 +172,24 @@ fun TurnosScreen() {
                     value = filtroDniPaciente,
                     onValueChange = { filtroDniPaciente = it },
                     label = { Text("Filtrar Paciente (DNI)") },
-                    modifier = Modifier.width(200.dp)
+                    modifier = Modifier.width(200.dp),
+                    shape = RoundedCornerShape(16.dp)
                 )
 
                 OutlinedTextField(
                     value = filtroPaciente,
                     onValueChange = { filtroPaciente = it },
                     label = { Text("Filtrar Paciente (nombre o apellido)") },
-                    modifier = Modifier.width(300.dp)
+                    modifier = Modifier.width(300.dp),
+                    shape = RoundedCornerShape(16.dp)
                 )
 
                 OutlinedTextField(
                     value = filtroProfesional,
                     onValueChange = { filtroProfesional = it },
                     label = { Text("Filtrar Profesional (nombre o apellido)") },
-                    modifier = Modifier.width(325.dp)
+                    modifier = Modifier.width(325.dp),
+                    shape = RoundedCornerShape(16.dp)
                 )
 
                 DropdownFiltro(
@@ -196,14 +199,15 @@ fun TurnosScreen() {
                     onSeleccion = { seleccion ->
                         filtroEstado.value = if (seleccion == "Todos") null else seleccion
                     },
-                    modifier = Modifier.width(150.dp)
+                    modifier = Modifier.width(150.dp),
                 )
 
                 OutlinedTextField(
                     value = filtroFecha ?: "",
                     onValueChange = { filtroFecha = it },
                     label = { Text("Fecha (aaaa-mm-dd)") },
-                    modifier = Modifier.width(200.dp)
+                    modifier = Modifier.width(200.dp),
+                    shape = RoundedCornerShape(16.dp)
                 )
 
                 Spacer(modifier = Modifier.width(45.dp))
@@ -433,11 +437,13 @@ fun DropdownFiltro(
                 readOnly = true,
                 modifier = Modifier
                     .menuAnchor()
-                    .fillMaxWidth()
+                    .fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp)
             )
             ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false }
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(Color.White)
             ) {
                 opciones.forEach { opcion ->
                     DropdownMenuItem(

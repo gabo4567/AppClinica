@@ -54,9 +54,17 @@ fun EditarPacienteForm(
         Spacer(modifier = Modifier.height(16.dp))
 
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier.fillMaxWidth()
+            horizontalArrangement = Arrangement.End, // para alinearlos a la derecha
+            modifier = Modifier.fillMaxWidth(),
         ) {
+            // Botón Cancelar primero, a la izquierda dentro del grupo
+            OutlinedButton(onClick = onCancelar) {
+                Text("Cancelar")
+            }
+
+            Spacer(modifier = Modifier.width(16.dp)) // espacio entre botones
+
+            // Botón Confirmar a la derecha
             Button(onClick = {
                 val personaActualizada = paciente.persona.copy(
                     dni = dni,
@@ -66,7 +74,6 @@ fun EditarPacienteForm(
                     telefono = telefono,
                     direccion = direccion,
                     fechaNacimiento = fechaNacimiento
-                    // Se conserva idRol, idEspecialidad, idEstado, id
                 )
 
                 val pacienteActualizado = paciente.copy(
@@ -78,10 +85,7 @@ fun EditarPacienteForm(
             }) {
                 Text("Confirmar")
             }
-
-            OutlinedButton(onClick = onCancelar) {
-                Text("Cancelar")
-            }
         }
+
     }
 }

@@ -62,7 +62,7 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                 onValueChange = { nombreUsuario = it },
                 label = { Text("Nombre de usuario") },
                 modifier = Modifier.fillMaxWidth(),
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
+                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -73,7 +73,7 @@ fun LoginScreen(onLoginSuccess: (String) -> Unit) {
                 label = { Text("Contraseña") },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
-                textStyle = LocalTextStyle.current.copy(fontSize = 20.sp)
+                textStyle = LocalTextStyle.current.copy(fontSize = 18.sp)
             )
 
             Spacer(modifier = Modifier.height(25.dp))

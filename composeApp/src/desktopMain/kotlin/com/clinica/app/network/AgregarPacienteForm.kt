@@ -1,6 +1,7 @@
 package com.clinica.app.network
 
 import RegistroPacienteDTO
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -8,6 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun AgregarPacienteForm(
@@ -142,7 +144,13 @@ fun AgregarPacienteForm(
             horizontalArrangement = Arrangement.End,
             modifier = Modifier.fillMaxWidth()
         ) {
-            TextButton(onClick = onCancelar) {
+            TextButton(
+                onClick = onCancelar,
+                modifier = Modifier
+                    .height(40.dp)
+                    .widthIn(min = 100.dp), // ancho mínimo para igualar tamaño
+                border = BorderStroke(1.dp, Color(0x4D000000)) // contorno negro suave
+            ) {
                 Text("Cancelar")
             }
             Spacer(modifier = Modifier.width(8.dp))
@@ -164,9 +172,12 @@ fun AgregarPacienteForm(
                     )
                     onConfirmar(nuevoPaciente)
                 }
-            }) {
-                Text("Agregar")
+            },
+                modifier = Modifier.height(40.dp)
+            ) {
+                Text("Confirmar")
             }
         }
+
     }
 }

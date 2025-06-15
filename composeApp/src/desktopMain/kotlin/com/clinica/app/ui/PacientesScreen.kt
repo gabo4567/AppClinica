@@ -3,6 +3,7 @@ package com.clinica.app.ui
 import RegistroPacienteDTO
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -102,7 +103,7 @@ fun PacientesScreen() {
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // FILTRO POR ESTADO + Botón Agregar alineado a la derecha
+            // Filtro por estado + botón Agregar alineado a la derecha
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -111,33 +112,64 @@ fun PacientesScreen() {
                     "Filtrar pacientes por estado: ",
                     modifier = Modifier.padding(end = 8.dp),
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 18.sp
                 )
 
                 Button(
                     onClick = { estadoFiltro = null },
-                    colors = if (estadoFiltro == null) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary) else ButtonDefaults.buttonColors()
+                    colors = if (estadoFiltro == null)
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1976D2),  // azul fuerte (activo)
+                            contentColor = Color.Black
+                        )
+                    else
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFBBDEFB),  // azul clarito (inactivo)
+                            contentColor = Color.Black
+                        ),
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.3f))
                 ) {
                     Text("Todos", fontSize = 16.sp)
                 }
+
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
                     onClick = { estadoFiltro = 1L },
-                    colors = if (estadoFiltro == 1L) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary) else ButtonDefaults.buttonColors()
+                    colors = if (estadoFiltro == 1L)
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1976D2),
+                            contentColor = Color.Black
+                        )
+                    else
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFBBDEFB),
+                            contentColor = Color.Black
+                        ),
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.3f))
                 ) {
                     Text("Activos", fontSize = 16.sp)
                 }
+
                 Spacer(modifier = Modifier.width(8.dp))
 
                 Button(
                     onClick = { estadoFiltro = 2L },
-                    colors = if (estadoFiltro == 2L) ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary) else ButtonDefaults.buttonColors()
+                    colors = if (estadoFiltro == 2L)
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF1976D2),
+                            contentColor = Color.Black
+                        )
+                    else
+                        ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFBBDEFB),
+                            contentColor = Color.Black
+                        ),
+                    border = BorderStroke(1.dp, Color.Black.copy(alpha = 0.3f))
                 ) {
                     Text("Inactivos", fontSize = 16.sp)
                 }
 
-                // Espaciador que empuja el botón a la derecha
                 Spacer(modifier = Modifier.weight(0.1f))
 
                 Button(
@@ -150,10 +182,7 @@ fun PacientesScreen() {
                 ) {
                     Text("Agregar Paciente", fontSize = 16.sp)
                 }
-
-
             }
-
 
             Spacer(modifier = Modifier.height(8.dp))
 

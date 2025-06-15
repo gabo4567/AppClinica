@@ -1,5 +1,6 @@
 package com.clinica.app.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -7,7 +8,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 
 enum class MenuOption(val label: String) {
@@ -30,38 +33,52 @@ fun MainScreen(onLogout: () -> Unit) {
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Column(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .padding(16.dp)
-                ) {
-                    MenuOption.values().forEach { option ->
-                        Text(
-                            text = option.label,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .clickable {
-                                    if (option == MenuOption.LOGOUT) {
-                                        onLogout()
-                                    } else {
-                                        selectedOption = option
-                                        scope.launch { drawerState.close() }
-                                    }
-                                },
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = if (selectedOption == option) FontWeight.Bold else FontWeight.Normal
+                Column(modifier = Modifier.fillMaxHeight()) {
+
+                    // Franja azul claro
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp) // Podés ajustar la altura si querés más angosto o más alto
+                            .background(Color(0xFF1565C0)) // azul oscuro
+                    )
+
+                    // Opciones del menú
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .padding(16.dp)
+                    ) {
+                        MenuOption.values().forEach { option ->
+                            Text(
+                                text = option.label,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp)
+                                    .clickable {
+                                        if (option == MenuOption.LOGOUT) {
+                                            onLogout()
+                                        } else {
+                                            selectedOption = option
+                                            scope.launch { drawerState.close() }
+                                        }
+                                    },
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    fontSize = 22.sp,
+                                    fontWeight = if (selectedOption == option) FontWeight.Bold else FontWeight.Normal
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
+
         }
     ) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Clínica Salud Total - Secretaría") },
+                    title = { Text("Clínica Salud Total - Secretaria", fontSize = 25.sp) },
                     navigationIcon = {
                         Text(
                             text = "☰", // ícono textual estilo hamburguesa

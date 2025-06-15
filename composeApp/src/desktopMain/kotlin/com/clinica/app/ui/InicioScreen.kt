@@ -104,7 +104,7 @@ fun InicioScreen() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally  // Esto centra los banners en la pantalla
                 ) {
-                    EspecialidadBanner(nombre = "Clínica general")
+                    EspecialidadBanner(nombre = "Clínica General")
                     EspecialidadBanner(nombre = "Pediatría")
                     EspecialidadBanner(nombre = "Ginecología")
                     EspecialidadBanner(nombre = "Cardiología")
