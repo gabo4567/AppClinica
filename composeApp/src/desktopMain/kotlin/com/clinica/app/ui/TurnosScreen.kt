@@ -32,6 +32,9 @@ fun TurnosScreen() {
     var profesionales by remember { mutableStateOf<List<ProfesionalDTO>>(emptyList()) }
     var pacientes by remember { mutableStateOf<List<Paciente>>(emptyList()) }
 
+    var turnoParaCancelar by remember { mutableStateOf<TurnoDTO?>(null) }
+    var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     var filtroDniPaciente by remember { mutableStateOf("") }
@@ -133,6 +136,7 @@ fun TurnosScreen() {
             }
         }
     }
+
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
@@ -348,7 +352,10 @@ fun TurnosScreen() {
 
                         TurnoRowItem(
                             turno = turno,
-                            onCancelarClick = { turnoACancelar -> cancelarTurno(turnoACancelar) },
+                            onCancelarClick = { turnoACancelar ->
+                                turnoParaCancelar = turnoACancelar
+                                mostrarDialogoConfirmacion = true
+                            },
                             onModificarClick = { turnoAModificar ->
                                 println("Modificar turno: ${turnoAModificar.comprobante}")
                                 // Aquí podés abrir un diálogo o navegar a pantalla de edición
@@ -364,6 +371,31 @@ fun TurnosScreen() {
 
             }
         }
+        if (mostrarDialogoConfirmacion && turnoParaCancelar != null) {
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoConfirmacion = false },
+                title = { Text("Confirmar cancelación") },
+                text = { Text("¿Estás seguro de que deseas cancelar este turno?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            cancelarTurno(turnoParaCancelar!!)
+                            mostrarDialogoConfirmacion = false
+                        }
+                    ) {
+                        Text("Confirmar", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { mostrarDialogoConfirmacion = false }
+                    ) {
+                        Text("Cancelar", color = Color.Blue)
+                    }
+                }
+            )
+        }
+
     }
 }
 
@@ -409,10 +441,9 @@ fun TurnoRowItem(
         ) {
             Text("Cancelar")
         }
+
     }
 }
-
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

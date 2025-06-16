@@ -1,7 +1,5 @@
 package com.clinica.app.network
 
-import ProfesionalDTO
-import com.clinica.app.models.Paciente
 import com.clinica.app.models.TurnoDTO
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -32,6 +30,17 @@ object TurnoApi {
         return response.body()
     }
 
+    suspend fun crearTurno(dto: RegistroTurnoDTO): Boolean {
+        val client = KtorClientConfig.config
+
+        val response: HttpResponse = client.post("http://localhost:8080/api/turnos") {
+            contentType(ContentType.Application.Json)
+            setBody(dto)
+        }
+
+        return response.status == HttpStatusCode.Created || response.status == HttpStatusCode.OK
+    }
+
     suspend fun cancelarTurno(turno: TurnoDTO): Boolean {
         val client = KtorClientConfig.config
         val turnoCancelado = turno.copy(idEstado = 11)
@@ -43,16 +52,5 @@ object TurnoApi {
         return response.status.isSuccess()
     }
 
-    suspend fun obtenerTodosLosPacientes(): List<Paciente> {
-        val client = KtorClientConfig.config
-        val response = client.get("http://localhost:8080/api/pacientes")
-        return response.body()
-    }
-
-    suspend fun obtenerTodosLosProfesionales(): List<ProfesionalDTO> {
-        val client = KtorClientConfig.config
-        val response = client.get("http://localhost:8080/api/profesionales")
-        return response.body()
-    }
 
 }
