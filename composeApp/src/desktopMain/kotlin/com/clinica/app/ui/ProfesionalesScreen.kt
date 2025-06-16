@@ -33,6 +33,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.style.TextOverflow
 
+val especialidadesMap = mapOf(
+    1L to "Clínica General",
+    2L to "Pediatría",
+    3L to "Cardiología",
+    4L to "Ginecología"
+)
+
 @Composable
 fun ProfesionalesScreen() {
     var estadoFiltro by remember { mutableStateOf<Long?>(null) } // null = todos, 1L = activo, 2L = inactivo
@@ -211,7 +218,7 @@ fun ProfesionalesScreen() {
                     contentAlignment = Alignment.Center
                 ) {
                     Snackbar(
-                        containerColor = Color(0xFF4CAF50) // verde éxito
+                        containerColor = Color(0xFF4CAF50)
                     ) {
                         Text(mensaje, color = Color.White)
                     }
@@ -238,47 +245,47 @@ fun ProfesionalesHeader() {
         ) {
             Text(
                 "DNI",
-                modifier = Modifier.padding(start = 25.dp),
+                modifier = Modifier.padding(start = 15.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             Text(
                 "Nombre",
-                modifier = Modifier.padding(start = 80.dp),
+                modifier = Modifier.padding(start = 70.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Apellido",
-                modifier = Modifier.padding(start = 65.dp),
+                modifier = Modifier.padding(start = 60.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Email",
-                modifier = Modifier.padding(start = 155.dp),
+                modifier = Modifier.padding(start = 140.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Teléfono",
-                modifier = Modifier.padding(start = 190.dp),
+                modifier = Modifier.padding(start = 170.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             Text(
                 "Especialidad",
-                modifier = Modifier.padding(start = 90.dp),
+                modifier = Modifier.padding(start = 100.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Fecha Nacimiento",
-                modifier = Modifier.padding(start = 75.dp),
+                modifier = Modifier.padding(start = 120.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier = Modifier.width(0.dp)) // espacio para botones
+            Spacer(modifier = Modifier.width(0.dp))
         }
     }
 }
@@ -297,28 +304,29 @@ fun ProfesionalItem(profesional: ProfesionalDTO) {
                 .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(profesional.dni, modifier = Modifier.weight(1.4f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(profesional.nombre, modifier = Modifier.weight(1.2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(profesional.apellido, modifier = Modifier.weight(1.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(profesional.email, modifier = Modifier.weight(3f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(profesional.telefono, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(profesional.idEspecialidad?.toString() ?: "-", modifier = Modifier.weight(1.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.dni, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.nombre, modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.apellido, modifier = Modifier.weight(1.4f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.email, modifier = Modifier.weight(2.4f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.telefono, modifier = Modifier.weight(1.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            val nombreEspecialidad = profesional.idEspecialidad?.let { especialidadesMap[it] } ?: "-"
+            Text(nombreEspecialidad, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
             Text(profesional.fechaNacimiento.toString(), modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
 
-            Spacer(modifier = Modifier.weight(0.7f))
+            Spacer(modifier = Modifier.weight(0.5f))
 
             // Botones de texto
             Button(
                 onClick = { /* Acción editar */ },
                 modifier = Modifier.padding(end = 8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2)) // celeste
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
             ) {
                 Text("Modificar")
             }
 
             Button(
                 onClick = { /* Acción eliminar */ },
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)) // rojo claro
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
             ) {
                 Text("Eliminar")
             }
