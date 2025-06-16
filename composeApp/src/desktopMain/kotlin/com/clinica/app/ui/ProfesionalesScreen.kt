@@ -1,5 +1,7 @@
 package com.clinica.app.ui
 
+import ProfesionalDTO
+import com.clinica.app.network.ProfesionalService
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -23,6 +25,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Text
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun ProfesionalesScreen() {
@@ -30,6 +39,7 @@ fun ProfesionalesScreen() {
     var mostrarFormularioAgregar by remember { mutableStateOf(false) }
     var mensajeExito by remember { mutableStateOf<String?>(null) }
     var eliminarErrorMessage by remember { mutableStateOf<String?>(null) }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -148,6 +158,32 @@ fun ProfesionalesScreen() {
 
             ProfesionalesHeader()
 
+            // Estado para la lista de profesionales
+            val profesionales = remember { mutableStateListOf<ProfesionalDTO>() }
+
+            // Cargar los profesionales al iniciar la pantalla
+            LaunchedEffect(Unit) {
+                try {
+                    val lista = ProfesionalService.getProfesionales()
+                    profesionales.clear()
+                    profesionales.addAll(lista)
+                } catch (e: Exception) {
+                    eliminarErrorMessage = "Error al cargar profesionales: ${e.message}"
+                }
+            }
+
+            // Aplicar filtro de estado si corresponde
+            val profesionalesFiltrados = profesionales.filter { profesional ->
+                estadoFiltro == null || profesional.idEstado == estadoFiltro
+            }
+
+            // Renderizar lista de profesionales
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(profesionalesFiltrados) { profesional ->
+                    ProfesionalItem(profesional)
+                }
+            }
+
             // Mensajes de error eliminar
             eliminarErrorMessage?.let {
                 Snackbar(
@@ -208,41 +244,84 @@ fun ProfesionalesHeader() {
             )
             Text(
                 "Nombre",
-                modifier = Modifier.padding(start = 60.dp),
+                modifier = Modifier.padding(start = 80.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Apellido",
-                modifier = Modifier.padding(start = 55.dp),
+                modifier = Modifier.padding(start = 65.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Email",
-                modifier = Modifier.padding(start = 125.dp),
+                modifier = Modifier.padding(start = 155.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Teléfono",
-                modifier = Modifier.padding(start = 180.dp),
+                modifier = Modifier.padding(start = 190.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             Text(
                 "Especialidad",
-                modifier = Modifier.padding(start = 140.dp),
+                modifier = Modifier.padding(start = 90.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
             Text(
                 "Fecha Nacimiento",
-                modifier = Modifier.padding(start = 110.dp),
+                modifier = Modifier.padding(start = 75.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.width(0.dp)) // espacio para botones
+        }
+    }
+}
+
+@Composable
+fun ProfesionalItem(profesional: ProfesionalDTO) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(profesional.dni, modifier = Modifier.weight(1.4f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.nombre, modifier = Modifier.weight(1.2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.apellido, modifier = Modifier.weight(1.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.email, modifier = Modifier.weight(3f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.telefono, modifier = Modifier.weight(2f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.idEspecialidad?.toString() ?: "-", modifier = Modifier.weight(1.5f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(profesional.fechaNacimiento.toString(), modifier = Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
+
+            Spacer(modifier = Modifier.weight(0.7f))
+
+            // Botones de texto
+            Button(
+                onClick = { /* Acción editar */ },
+                modifier = Modifier.padding(end = 8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2)) // celeste
+            ) {
+                Text("Modificar")
+            }
+
+            Button(
+                onClick = { /* Acción eliminar */ },
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F)) // rojo claro
+            ) {
+                Text("Eliminar")
+            }
         }
     }
 }
