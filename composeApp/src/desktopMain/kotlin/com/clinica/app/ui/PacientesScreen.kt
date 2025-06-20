@@ -78,7 +78,7 @@ fun PacientesScreen() {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp) // quité el padding top
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 0.dp)
         ) {
 
             Surface(
@@ -194,7 +194,7 @@ fun PacientesScreen() {
                 Text(errorMessage!!, color = MaterialTheme.colorScheme.error)
             } else {
                 PacientesHeader()
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(1.dp))
 
                 if (mostrarDialogoEliminar && pacienteAEliminar != null) {
                     AlertDialog(
@@ -399,7 +399,7 @@ fun PacientesHeader() {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             modifier = Modifier
