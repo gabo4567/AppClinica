@@ -32,6 +32,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.window.Dialog
+import com.clinica.app.network.AgregarProfesionalForm
+import com.clinica.app.network.EditarProfesionalForm
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 val especialidadesMap = mapOf(
     1L to "Clínica General",
@@ -47,6 +52,16 @@ fun ProfesionalesScreen() {
     var mensajeExito by remember { mutableStateOf<String?>(null) }
     var eliminarErrorMessage by remember { mutableStateOf<String?>(null) }
 
+    var mostrarFormularioEditar by remember { mutableStateOf(false) }
+    var profesionalSeleccionado by remember { mutableStateOf<ProfesionalDTO?>(null) }
+
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
+    var profesionalAEliminar by remember { mutableStateOf<ProfesionalDTO?>(null) }
+    var isProcessingEliminar by remember { mutableStateOf(false) }
+
+    val profesionales = remember { mutableStateListOf<ProfesionalDTO>() }
+
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -161,12 +176,7 @@ fun ProfesionalesScreen() {
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Aquí luego irá la lista de profesionales, pero por ahora solo el encabezado
-
             ProfesionalesHeader()
-
-            // Estado para la lista de profesionales
-            val profesionales = remember { mutableStateListOf<ProfesionalDTO>() }
 
             // Cargar los profesionales al iniciar la pantalla
             LaunchedEffect(Unit) {
@@ -187,7 +197,18 @@ fun ProfesionalesScreen() {
             // Renderizar lista de profesionales
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(profesionalesFiltrados) { profesional ->
-                    ProfesionalItem(profesional)
+                    ProfesionalItem(
+                        profesional = profesional,
+                        onEditarClick = { seleccionado ->
+                            profesionalSeleccionado = seleccionado
+                            mostrarFormularioEditar = true
+                        },
+                        onEliminarClick = { seleccionado ->
+                            profesionalAEliminar = seleccionado
+                            mostrarDialogoEliminar = true
+                        }
+
+                    )
                 }
             }
 
@@ -204,7 +225,7 @@ fun ProfesionalesScreen() {
             }
         }
 
-        // Mensaje éxito centrado (igual que en pacientes)
+        // Mensaje éxito centrado
         mensajeExito?.let { mensaje ->
             AnimatedVisibility(
                 visible = true,
@@ -218,13 +239,152 @@ fun ProfesionalesScreen() {
                     contentAlignment = Alignment.Center
                 ) {
                     Snackbar(
-                        containerColor = Color(0xFF4CAF50)
+                        //containerColor = Color(0xFF4CAF50)
                     ) {
-                        Text(mensaje, color = Color.White)
+                        Text(mensaje //, color = Color.White
+                        )
+                    }
+                }
+                // Ocultarlo automáticamente después de 3 segundos
+                LaunchedEffect(mensaje) {
+                    delay(3000)
+                    mensajeExito = null
+                }
+            }
+        }
+        if (mostrarFormularioAgregar) {
+            Dialog(onDismissRequest = { mostrarFormularioAgregar = false }) {
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    tonalElevation = 8.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    AgregarProfesionalForm(
+                        onConfirmar = { nuevoProfesional ->
+                            scope.launch {
+                                try {
+                                    ProfesionalService.crearProfesional(nuevoProfesional)
+                                    mensajeExito = "Profesional agregado con éxito"
+                                    mostrarFormularioAgregar = false
+                                    // Recargar la lista
+                                    val listaActualizada = ProfesionalService.getProfesionales()
+                                    profesionales.clear()
+                                    profesionales.addAll(listaActualizada)
+                                } catch (e: Exception) {
+                                    eliminarErrorMessage = "Error al agregar profesional: ${e.message}"
+                                }
+                            }
+                        },
+                        onCancelar = {
+                            mostrarFormularioAgregar = false
+                        }
+                    )
+                }
+            }
+        }
+
+        if (mostrarFormularioEditar && profesionalSeleccionado != null) {
+            Dialog(onDismissRequest = {
+                mostrarFormularioEditar = false
+                profesionalSeleccionado = null
+            }) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    tonalElevation = 8.dp,
+                    modifier = Modifier
+                        .fillMaxWidth(0.95f)
+                        .padding(30.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp) // padding interior para el contenido
+                    ) {
+                        Text(
+                            text = "Modificar Profesional",
+                            style = MaterialTheme.typography.headlineSmall,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+
+                        EditarProfesionalForm(
+                            profesional = profesionalSeleccionado!!,
+                            onConfirmar = { profesionalEditado ->
+                                scope.launch {
+                                    try {
+                                        // Si estaba inactivo (2), lo activamos (1)
+                                        val profesionalEditadoConEstado = if (profesionalEditado.idEstado == 2L) {
+                                            profesionalEditado.copy(idEstado = 1L)
+                                        } else {
+                                            profesionalEditado
+                                        }
+
+                                        ProfesionalService.actualizarProfesional(profesionalEditadoConEstado.id, profesionalEditadoConEstado)
+                                        mensajeExito = "Profesional actualizado con éxito"
+                                        mostrarFormularioEditar = false
+                                        profesionalSeleccionado = null
+                                        val listaActualizada = ProfesionalService.getProfesionales()
+                                        profesionales.clear()
+                                        profesionales.addAll(listaActualizada)
+                                    } catch (e: Exception) {
+                                        eliminarErrorMessage = "Error al modificar profesional: ${e.message}"
+                                    }
+                                }
+                            },
+                            onCancelar = {
+                                mostrarFormularioEditar = false
+                                profesionalSeleccionado = null
+                            }
+                        )
                     }
                 }
             }
         }
+
+        if (mostrarDialogoEliminar && profesionalAEliminar != null) {
+            AlertDialog(
+                onDismissRequest = { mostrarDialogoEliminar = false },
+                title = { Text("Confirmar eliminación") },
+                text = { Text("¿Estás seguro de que deseas eliminar al profesional?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        eliminarErrorMessage = null
+                        isProcessingEliminar = true
+                        mostrarDialogoEliminar = false
+
+                        println("Intentando desactivar profesional con ID: ${profesionalAEliminar?.id}")
+
+                        scope.launch {
+                            try {
+                                // Copiamos el profesional cambiando el estado a 2 (inactivo)
+                                val profesionalInactivo = profesionalAEliminar!!.copy(idEstado = 2)
+                                // Llamamos a actualizar profesional con el nuevo estado
+                                ProfesionalService.actualizarProfesional(profesionalInactivo.id, profesionalInactivo)
+                                mensajeExito = "Profesional eliminado con éxito"
+                                val listaActualizada = ProfesionalService.getProfesionales()
+                                profesionales.clear()
+                                profesionales.addAll(listaActualizada)
+                            } catch (e: Exception) {
+                                eliminarErrorMessage = "Error al eliminar profesional: ${e.message}"
+                                e.printStackTrace()
+                            } finally {
+                                isProcessingEliminar = false
+                                profesionalAEliminar = null
+                            }
+                        }
+                    }) {
+                        Text("Confirmar", color = Color.Red)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarDialogoEliminar = false
+                        profesionalAEliminar = null
+                    }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
+
     }
 }
 
@@ -291,7 +451,11 @@ fun ProfesionalesHeader() {
 }
 
 @Composable
-fun ProfesionalItem(profesional: ProfesionalDTO) {
+fun ProfesionalItem(
+    profesional: ProfesionalDTO,
+    onEditarClick: (ProfesionalDTO) -> Unit,
+    onEliminarClick: (ProfesionalDTO) -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -315,9 +479,8 @@ fun ProfesionalItem(profesional: ProfesionalDTO) {
 
             Spacer(modifier = Modifier.weight(0.5f))
 
-            // Botones de texto
             Button(
-                onClick = { /* Acción editar */ },
+                onClick = { onEditarClick(profesional) },
                 modifier = Modifier.padding(end = 8.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
             ) {
@@ -325,7 +488,7 @@ fun ProfesionalItem(profesional: ProfesionalDTO) {
             }
 
             Button(
-                onClick = { /* Acción eliminar */ },
+                onClick = { onEliminarClick(profesional) },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFD32F2F))
             ) {
                 Text("Eliminar")
@@ -333,3 +496,5 @@ fun ProfesionalItem(profesional: ProfesionalDTO) {
         }
     }
 }
+
+

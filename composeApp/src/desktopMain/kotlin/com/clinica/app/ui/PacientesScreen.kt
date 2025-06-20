@@ -42,11 +42,11 @@ fun PacientesScreen() {
     var editErrorMessage by remember { mutableStateOf<String?>(null) }
     var isProcessingEdit by remember { mutableStateOf(false) }
 
+    var pacienteAEliminar by remember { mutableStateOf<Paciente?>(null) }
+    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
     var eliminarErrorMessage by remember { mutableStateOf<String?>(null) }
     var isProcessingEliminar by remember { mutableStateOf(false) }
 
-    var pacienteAEliminar by remember { mutableStateOf<Paciente?>(null) }
-    var mostrarDialogoEliminar by remember { mutableStateOf(false) }
 
     // val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -210,6 +210,9 @@ fun PacientesScreen() {
                                     try {
                                         PacienteService.eliminarPaciente(pacienteAEliminar!!.id)
                                         cargarPacientes()
+                                        // 🎉 Mostrar mensaje de éxito
+                                        mensajeExito = "Paciente eliminado con éxito"
+
                                     } catch (e: Exception) {
                                         eliminarErrorMessage = "Error al eliminar paciente: ${e.message}"
                                         e.printStackTrace()
@@ -264,9 +267,10 @@ fun PacientesScreen() {
                     contentAlignment = Alignment.Center
                 ) {
                     Snackbar(
-                        containerColor = Color(0xFF4CAF50) // verde éxito
+                        // containerColor = Color(0xFF4CAF50) // verde éxito
                     ) {
-                        Text(mensaje, color = Color.White)
+                        Text(mensaje//, color = Color.White
+                        )
                     }
                 }
             }
@@ -353,6 +357,8 @@ fun PacientesScreen() {
                                     // Refrescar lista tras editar
                                     cargarPacientes()
                                     pacienteAEditar = null
+                                    // 🎉 Mostrar mensaje de éxito
+                                    mensajeExito = "Paciente modificado con éxito"
                                 } catch (e: Exception) {
                                     editErrorMessage = "Error al actualizar paciente: ${e.message}"
                                     e.printStackTrace()
