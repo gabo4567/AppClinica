@@ -49,6 +49,8 @@ kotlin {
                 implementation("io.ktor:ktor-client-cio:2.3.5") // o reemplazá con tu versión de Ktor
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0") // ✅ Agregado datetime
 
+                // implementation("androidx.compose.ui:ui-text:1.5.0")
+
             }
         }
     }

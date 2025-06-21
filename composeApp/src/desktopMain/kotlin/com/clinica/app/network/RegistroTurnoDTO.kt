@@ -1,16 +1,17 @@
 package com.clinica.app.network
 
-import com.clinica.app.models.LocalDateTimeSerializer
-import kotlinx.datetime.LocalDateTime
+// import com.clinica.app.models.LocalDateTimeSerializer
+// import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RegistroTurnoDTO(
     val idPaciente: Long,
     val idProfesional: Long,
-    @Serializable(with = LocalDateTimeSerializer::class)
-    val fechaHora: LocalDateTime,
+    // @Serializable(with = LocalDateTimeSerializer::class)
+    // val fechaHora: LocalDateTime,
+    val fechaHora: String,
     val duracion: Int,
-    val idEstado: Long = 1, // Estado "activo" o "reservado"
+    val idEstado: Long = 9, // Estado "confirmado"
     val observaciones: String? = null
 )

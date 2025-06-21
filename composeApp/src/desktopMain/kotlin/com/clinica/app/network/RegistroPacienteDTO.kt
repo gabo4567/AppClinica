@@ -8,10 +8,10 @@ data class RegistroPacienteDTO(
     val email: String,
     val telefono: String,
     val direccion: String,
-    val idRol: Long = 4,            // Suponiendo que 4 es paciente fijo
+    val idRol: Long = 4,
     val idEspecialidad: Long? = null, // null porque paciente no tiene especialidad
-    val idEstadoPersona: Long = 1,  // Activo, o puedes parametrizar
+    val idEstadoPersona: Long = 1,  // Activo
     val fechaNacimiento: String,
     val obraSocial: String,
-    val idEstadoPaciente: Long = 1  // Activo, o parametrizable
+    val idEstadoPaciente: Long = 1  // Activo
 )

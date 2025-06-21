@@ -10,18 +10,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.clinica.app.models.TurnoDTO
 import com.clinica.app.models.Paciente
-import com.clinica.app.network.PacienteService
-import com.clinica.app.network.ProfesionalService
-import com.clinica.app.network.TurnoApi
 import ProfesionalDTO
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
-import com.clinica.app.network.nombreEstadoPorId
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.unit.sp
+import com.clinica.app.network.*
+import kotlinx.coroutines.delay
+
+fun nombreEspecialidadPorId(idEspecialidad: Long?): String {
+    return when (idEspecialidad) {
+        1L -> "Clínica General"
+        2L -> "Pediatría"
+        3L -> "Cardiología"
+        4L -> "Ginecología"
+        else -> "Desconocida"
+    }
+}
 
 @Composable
 fun TurnosScreen() {
@@ -35,7 +45,11 @@ fun TurnosScreen() {
     var turnoParaCancelar by remember { mutableStateOf<TurnoDTO?>(null) }
     var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
 
+    var mostrarDialogoNuevoTurno by remember { mutableStateOf(false) }
+
     val snackbarHostState = remember { SnackbarHostState() }
+
+    var mensajeExito by remember { mutableStateOf<String?>(null) }
 
     var filtroDniPaciente by remember { mutableStateOf("") }
     var filtroFecha by remember { mutableStateOf<String?>(null) }
@@ -130,16 +144,23 @@ fun TurnosScreen() {
                 turnos = turnos.map {
                     if (it.id == turnoCancelado.id) turnoCancelado else it
                 }
-                snackbarHostState.showSnackbar("Turno cancelado correctamente")
+                mensajeExito = "Turno cancelado correctamente"  // <-- aquí cambio importante
             } else {
                 snackbarHostState.showSnackbar("Error al cancelar turno")
             }
         }
     }
 
-
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    modifier = Modifier.fillMaxWidth(),
+                    snackbarData = data
+                )
+            }
+        }
+
     ) { padding ->
         Column(
             modifier = Modifier
@@ -217,11 +238,11 @@ fun TurnosScreen() {
                 Spacer(modifier = Modifier.width(45.dp))
 
                 Button(
-                    onClick = { /* Acción para nuevo turno */ },
+                    onClick = { mostrarDialogoNuevoTurno = true },
                     modifier = Modifier.height(45.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF66BB6A), // Verde claro
-                        contentColor = Color.White          // Texto blanco
+                        containerColor = Color(0xFF66BB6A),
+                        contentColor = Color.White
                     )
                 ) {
                     Text("Nuevo Turno", fontSize = 16.sp)
@@ -323,8 +344,8 @@ fun TurnosScreen() {
                         contentAlignment = Alignment.CenterStart
                     ) {
                         Text(
-                            "Fecha",
-                            modifier = Modifier.offset(x = (-95).dp),
+                            "Fecha y Hora",
+                            modifier = Modifier.offset(x = (-115).dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -396,7 +417,66 @@ fun TurnosScreen() {
             )
         }
 
+        if (mostrarDialogoNuevoTurno) {
+            AgregarTurnoForm(
+                pacientes = pacientes,
+                profesionales = profesionales,
+                onConfirmar = { nuevoTurno ->
+                    scope.launch {
+                        val exito = try {
+                            TurnoApi.crearTurno(nuevoTurno)
+                        } catch (e: Exception) {
+                            snackbarHostState.showSnackbar("Error al crear turno: ${e.message}")
+                            false
+                        }
+
+                        if (exito) {
+                            mostrarDialogoNuevoTurno = false
+                            mensajeExito = "Turno creado correctamente"
+                            cargarTurnos()
+                        } else {
+                            snackbarHostState.showSnackbar("Error al crear turno")
+                        }
+                    }
+                },
+                onCancelar = { mostrarDialogoNuevoTurno = false },
+                obtenerFechasDisponiblesApi = { idProfesional ->
+                    HorarioDisponibleApi.obtenerFechasDisponibles(idProfesional)
+                },
+                obtenerHorariosDisponiblesApi = { idProfesional, fecha ->
+                    HorarioDisponibleApi.obtenerHorariosDisponibles(idProfesional, fecha)
+                }
+            )
+        }
+
+
     }
+
+    mensajeExito?.let { mensaje ->
+        AnimatedVisibility(
+            visible = true,
+            enter = fadeIn(animationSpec = tween(durationMillis = 600)) + slideInVertically(initialOffsetY = { -40 }),
+            exit = fadeOut(animationSpec = tween(durationMillis = 600)) + slideOutVertically(targetOffsetY = { -40 })
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Snackbar {
+                    Text(mensaje)
+                }
+            }
+        }
+
+        // Ocultar automáticamente después de 3 segundos
+        LaunchedEffect(mensaje) {
+            delay(3000)
+            mensajeExito = null
+        }
+    }
+
 }
 
 @Composable
