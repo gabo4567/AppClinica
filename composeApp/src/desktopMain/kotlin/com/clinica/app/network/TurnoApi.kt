@@ -2,6 +2,7 @@ package com.clinica.app.network
 
 import com.clinica.app.models.TurnoDTO
 import io.ktor.client.call.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -30,16 +31,52 @@ object TurnoApi {
         return response.body()
     }
 
-    suspend fun crearTurno(dto: RegistroTurnoDTO): Boolean {
+    /*suspend fun crearTurno(dto: RegistroTurnoDTO): Result<Boolean> {
         val client = KtorClientConfig.config
 
-        val response: HttpResponse = client.post("http://localhost:8080/api/turnos") {
-            contentType(ContentType.Application.Json)
-            setBody(dto)
+        return try {
+            val response: HttpResponse = client.post("http://localhost:8080/api/turnos") {
+                contentType(ContentType.Application.Json)
+                setBody(dto)
+            }
+            if (response.status == HttpStatusCode.Created || response.status == HttpStatusCode.OK) {
+                Result.success(true)
+            } else {
+                Result.failure(Exception("Error inesperado al crear turno"))
+            }
+        } catch (e: ClientRequestException) {
+            // Aquí capturamos errores HTTP 4xx
+            val errorBody = e.response.bodyAsText()
+            // Podés parsear o directamente devolver el mensaje para mostrarlo
+            Result.failure(Exception("Error al crear turno: $errorBody"))
+        } catch (e: Exception) {
+            // Otros errores, como problemas de red
+            Result.failure(e)
         }
+    }*/
 
-        return response.status == HttpStatusCode.Created || response.status == HttpStatusCode.OK
+    suspend fun crearTurno(dto: RegistroTurnoDTO): Result<Boolean> {
+        val client = KtorClientConfig.config
+
+        return try {
+            val response: HttpResponse = client.post("http://localhost:8080/api/turnos") {
+                contentType(ContentType.Application.Json)
+                setBody(dto)
+            }
+            if (response.status == HttpStatusCode.Created || response.status == HttpStatusCode.OK) {
+                Result.success(true)
+            } else {
+                Result.failure(Exception("El horario seleccionado ya fue reservado anteriormente"))
+            }
+        } catch (e: ClientRequestException) {
+            // Aquí capturamos errores HTTP 4xx
+            val errorBody = e.response.bodyAsText()
+            Result.failure(Exception(errorBody))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
+
 
     suspend fun actualizarTurno(id: Long, dto: RegistroTurnoDTO): Boolean {
         println("DEBUG - Actualizando turno con ID: $id y DTO: $dto")

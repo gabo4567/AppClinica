@@ -449,10 +449,25 @@ fun TurnosScreen() {
                 profesionales = profesionales,
                 onConfirmar = { nuevoTurno ->
                     scope.launch {
-                        val exito = try {
+                        val resultado = try {
                             TurnoApi.crearTurno(nuevoTurno)
                         } catch (e: Exception) {
-                            snackbarHostState.showSnackbar("Error al crear turno: ${e.message}")
+                            val mensajeError = e.message ?: "Error desconocido"
+                            if (mensajeError.contains("Turno superpuesto", ignoreCase = true)) {
+                                snackbarHostState.showSnackbar("No se puede crear turno: ya hay uno reservado en ese horario.")
+                            } else {
+                                snackbarHostState.showSnackbar("Error al crear turno: $mensajeError")
+                            }
+                            return@launch
+                        }
+
+                        val exito = resultado.getOrElse { e ->
+                            val mensajeError = e.message ?: "Error desconocido"
+                            if (mensajeError.contains("Turno superpuesto")) {
+                                snackbarHostState.showSnackbar("No se puede crear turno: ya hay uno reservado en ese horario.")
+                            } else {
+                                snackbarHostState.showSnackbar("Error al crear turno: $mensajeError")
+                            }
                             false
                         }
 
@@ -460,9 +475,8 @@ fun TurnosScreen() {
                             mostrarDialogoNuevoTurno = false
                             mensajeExito = "Turno creado correctamente"
                             cargarTurnos()
-                        } else {
-                            snackbarHostState.showSnackbar("Error al crear turno")
                         }
+                        // En caso de error ya mostramos snackbar arriba, no es necesario else
                     }
                 },
                 onCancelar = { mostrarDialogoNuevoTurno = false },
@@ -474,6 +488,7 @@ fun TurnosScreen() {
                 }
             )
         }
+
 
         if (mostrarDialogoEditarTurno && turnoParaEditar != null) {
             val profesionalDelTurno = profesionales.find { it.idPersona == turnoParaEditar!!.idProfesional }
