@@ -158,7 +158,7 @@ fun EditarTurnoForm(
                                     idProfesional = profesional.idPersona,
                                     fechaHora = fechaHora,
                                     duracion = 30,
-                                    idEstado = 10,
+                                    idEstado = 12,  // estado reprogramado
                                     observaciones = turnoOriginal.observaciones
                                 )
 

@@ -12,6 +12,6 @@ data class RegistroTurnoDTO(
     // val fechaHora: LocalDateTime,
     val fechaHora: String,
     val duracion: Int,
-    val idEstado: Long = 9, // Estado "confirmado"
+    val idEstado: Long = 10, // Estado "programado"
     val observaciones: String? = null
 )

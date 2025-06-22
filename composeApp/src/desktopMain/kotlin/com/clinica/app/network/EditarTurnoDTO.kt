@@ -9,6 +9,6 @@ data class EditarTurnoDTO(
     val idProfesional: Long,
     val fechaHora: String,       // Formato ISO: "2025-06-25T10:00"
     val duracion: Int,
-    val idEstado: Long = 10,
+    val idEstado: Long = 12, // estado reprogramado
     val observaciones: String? = null
 )
