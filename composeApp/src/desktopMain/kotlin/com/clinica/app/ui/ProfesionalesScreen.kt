@@ -187,7 +187,7 @@ fun ProfesionalesScreen() {
                     seleccion = filtroEspecialidad,
                     onSeleccion = { filtroEspecialidad = it },
                     modifier = Modifier
-                        .width(200.dp)
+                        .width(170.dp)
                         .padding(start = 8.dp)
                 )
 
