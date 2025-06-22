@@ -52,6 +52,9 @@ fun TurnosScreen() {
     var mostrarDialogoEditarTurno by remember { mutableStateOf(false) }
     var turnoParaEditar by remember { mutableStateOf<TurnoDTO?>(null) }
 
+    var turnoParaActualizar by remember { mutableStateOf<TurnoDTO?>(null) }
+    var mostrarDialogoAtendido by remember { mutableStateOf(false) }
+
     val snackbarHostState = remember { SnackbarHostState() }
 
     var mensajeExito by remember { mutableStateOf<String?>(null) }
@@ -311,7 +314,7 @@ fun TurnosScreen() {
                     ) {
                         Text(
                             "Comprobante",
-                            modifier = Modifier.padding(start = 15.dp),
+                            modifier = Modifier.padding(start = 26.dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -321,7 +324,7 @@ fun TurnosScreen() {
                     ) {
                         Text(
                             "DNI",
-                            modifier = Modifier.padding(start = 5.dp),
+                            modifier = Modifier.padding(start = 1.dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -341,7 +344,7 @@ fun TurnosScreen() {
                     ) {
                         Text(
                             "Teléfono",
-                            modifier = Modifier.offset(x = (-40).dp),
+                            modifier = Modifier.offset(x = (-50).dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -351,7 +354,7 @@ fun TurnosScreen() {
                     ) {
                         Text(
                             "Profesional",
-                            modifier = Modifier.offset(x = (-95).dp),
+                            modifier = Modifier.offset(x = (-115).dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -361,7 +364,7 @@ fun TurnosScreen() {
                     ) {
                         Text(
                             "Fecha y Hora",
-                            modifier = Modifier.offset(x = (-115).dp),
+                            modifier = Modifier.offset(x = (-175).dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -371,7 +374,7 @@ fun TurnosScreen() {
                     ) {
                         Text(
                             "Estado",
-                            modifier = Modifier.offset(x = (-70).dp),
+                            modifier = Modifier.offset(x = (-145).dp),
                             style = MaterialTheme.typography.titleMedium
                         )
                     }
@@ -398,14 +401,20 @@ fun TurnosScreen() {
                                 turnoParaEditar = turnoAModificar
                                 mostrarDialogoEditarTurno = true
                             },
+                            onMarcarComoAtendidoClick = { turnoAMarcar ->
+                                turnoParaActualizar = turnoAMarcar
+                                mostrarDialogoAtendido = true
+                            },
                             nombrePaciente = nombrePaciente,
                             nombreProfesional = nombreProfesional,
                             dniPaciente = dniPaciente,
                             telefonoPaciente = telefonoPaciente
                         )
+
                         Divider()
                     }
                 }
+
 
             }
         }
@@ -510,6 +519,56 @@ fun TurnosScreen() {
             }
         }
 
+        if (mostrarDialogoAtendido && turnoParaActualizar != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    mostrarDialogoAtendido = false
+                    turnoParaActualizar = null
+                },
+                title = { Text("Confirmar asistencia") },
+                text = { Text("¿Deseas marcar este turno como atendido?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        // Cambiar estado a 13 (atendido)
+                        val turnoAtendido = turnoParaActualizar!!.copy(idEstado = 13)
+                        scope.launch {
+                            val exito = try {
+                                TurnoApi.actualizarTurno(turnoAtendido.id!!, RegistroTurnoDTO(
+                                    idPaciente = turnoAtendido.idPaciente,
+                                    idProfesional = turnoAtendido.idProfesional,
+                                    fechaHora = turnoAtendido.fechaHora.toString(),
+                                    duracion = turnoAtendido.duracion,
+                                    idEstado = 13,
+                                    observaciones = turnoAtendido.observaciones
+                                ))
+                            } catch (e: Exception) {
+                                snackbarHostState.showSnackbar("Error al actualizar turno: ${e.message}")
+                                false
+                            }
+
+                            if (exito) {
+                                mensajeExito = "Turno marcado como atendido"
+                                cargarTurnos()
+                            }
+                        }
+                        mostrarDialogoAtendido = false
+                        turnoParaActualizar = null
+                    }) {
+                        Text("Confirmar", color = Color(0xFF4CAF50))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarDialogoAtendido = false
+                        turnoParaActualizar = null
+                    }) {
+                        Text("Cancelar", color = Color.Blue)
+                    }
+                }
+            )
+        }
+
+
     }
 
     mensajeExito?.let { mensaje ->
@@ -544,6 +603,7 @@ fun TurnoRowItem(
     turno: TurnoDTO,
     onCancelarClick: (TurnoDTO) -> Unit,
     onModificarClick: (TurnoDTO) -> Unit,  // NUEVO parámetro para el botón Modificar
+    onMarcarComoAtendidoClick: (TurnoDTO) -> Unit,
     nombrePaciente: String,
     nombreProfesional: String,
     dniPaciente: String,
@@ -555,34 +615,51 @@ fun TurnoRowItem(
             .padding(vertical = 8.dp, horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(turno.comprobante, modifier = Modifier.weight(2f))
-        Text(dniPaciente, modifier = Modifier.weight(1.2f))
-        Text(nombrePaciente, modifier = Modifier.weight(1.5f))
-        Text(telefonoPaciente, modifier = Modifier.weight(1.5f))
-        Text(nombreProfesional, modifier = Modifier.weight(1.8f))
-        Text(turno.fechaHora.toString(), modifier = Modifier.weight(1.5f))
-        Text(nombreEstadoPorId(turno.idEstado), modifier = Modifier.weight(1.5f).padding(start = 20.dp))
+        Text(turno.comprobante, modifier = Modifier.weight(1.6f))
+        Text(dniPaciente, modifier = Modifier.weight(1f))
+        Text(nombrePaciente, modifier = Modifier.weight(1.2f))
+        Text(telefonoPaciente, modifier = Modifier.weight(1.1f))
+        Text(nombreProfesional, modifier = Modifier.weight(1.3f))
+        Text(turno.fechaHora.toString(), modifier = Modifier.weight(1.2f))
+        Text(
+            nombreEstadoPorId(turno.idEstado),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 6.dp)
+        )
 
-        // Botón Modificar agregado justo antes de Cancelar
+        //  Botón "Atendido" pequeño y verde
+        Button(
+            onClick = { onMarcarComoAtendidoClick(turno) },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)), // Verde
+            modifier = Modifier
+                .width(110.dp)
+                .padding(end = 6.dp)
+        ) {
+            Text("Atendido", fontSize = 12.sp)
+        }
+
+        //  Botón "Modificar"
         Button(
             onClick = { onModificarClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             modifier = Modifier
-                .width(120.dp)
-                .padding(end = 8.dp)
+                .width(110.dp)
+                .padding(end = 6.dp)
         ) {
-            Text("Modificar")
+            Text("Modificar", fontSize = 12.sp)
         }
 
+        //  Botón "Cancelar"
         Button(
             onClick = { onCancelarClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            modifier = Modifier.width(105.dp)
+            modifier = Modifier.width(100.dp)
         ) {
-            Text("Cancelar")
+            Text("Cancelar", fontSize = 12.sp)
         }
-
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
