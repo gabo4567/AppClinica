@@ -9,13 +9,14 @@ import androidx.compose.ui.unit.dp
 import ProfesionalDTO
 import androidx.compose.ui.window.Dialog
 import com.clinica.app.models.TurnoDTO
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun EditarTurnoForm(
     turnoOriginal: TurnoDTO,
     profesionalDelTurno: ProfesionalDTO,
     profesionales: List<ProfesionalDTO>,
-    onConfirmar: (RegistroTurnoDTO) -> Unit,
+    onConfirmar: (EditarTurnoDTO) -> Unit,
     onCancelar: () -> Unit,
     obtenerFechasDisponiblesApi: suspend (idProfesional: Long) -> List<String>,
     obtenerHorariosDisponiblesApi: suspend (idProfesional: Long, fecha: String) -> List<String>
@@ -53,7 +54,7 @@ fun EditarTurnoForm(
                 var horariosDisponibles by remember { mutableStateOf<List<String>>(emptyList()) }
 
                 val fechaOriginal = turnoOriginal.fechaHora.toLocalDate().toString()
-                val horaOriginal = turnoOriginal.fechaHora.toLocalTime().toString()
+                val horaOriginal = turnoOriginal.fechaHora.toLocalTime().format(DateTimeFormatter.ofPattern("HH:mm"))
 
                 var fechaSeleccionada by remember { mutableStateOf(fechaOriginal) }
                 var horaSeleccionada by remember { mutableStateOf(horaOriginal) }
@@ -151,12 +152,13 @@ fun EditarTurnoForm(
                             val profesional = profesionalSeleccionado
                             if (profesional != null && fechaSeleccionada.isNotBlank() && horaSeleccionada.isNotBlank()) {
                                 val fechaHora = "${fechaSeleccionada}T${horaSeleccionada}"
-                                val turnoModificado = RegistroTurnoDTO(
+                                val turnoModificado = EditarTurnoDTO(
+                                    id = turnoOriginal.id!!,
                                     idPaciente = turnoOriginal.idPaciente,
                                     idProfesional = profesional.idPersona,
                                     fechaHora = fechaHora,
                                     duracion = 30,
-                                    idEstado = turnoOriginal.idEstado,
+                                    idEstado = 10,
                                     observaciones = turnoOriginal.observaciones
                                 )
 

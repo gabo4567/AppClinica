@@ -32,6 +32,7 @@ fun PacientesScreen() {
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var estadoFiltro by remember { mutableStateOf<Long?>(null) } // null = todos, 1L = activo, 2L = inactivo
+    var filtroDniPaciente by remember { mutableStateOf("") } // NUEVO: filtro por DNI
 
     var mostrarFormularioAgregar by remember { mutableStateOf(false) }
     var isProcessingAgregar by remember { mutableStateOf(false) }
@@ -69,9 +70,11 @@ fun PacientesScreen() {
         cargarPacientes()
     }
 
-    // Filtrar pacientes según estadoFiltro
+    // Filtrar pacientes según estadoFiltro y filtroDniPaciente
     val pacientesFiltrados = pacientes.filter { paciente ->
-        estadoFiltro == null || paciente.idEstado == estadoFiltro
+        val cumpleEstado = estadoFiltro == null || paciente.idEstado == estadoFiltro
+        val cumpleDni = filtroDniPaciente.isBlank() || paciente.persona.dni.contains(filtroDniPaciente, ignoreCase = true)
+        cumpleEstado && cumpleDni
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -171,6 +174,19 @@ fun PacientesScreen() {
                 ) {
                     Text("Inactivos", fontSize = 16.sp)
                 }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                OutlinedTextField(
+                    value = filtroDniPaciente,
+                    onValueChange = { filtroDniPaciente = it },
+                    label = { Text("Filtrar Paciente (DNI)") },
+                    modifier = Modifier
+                        .width(225.dp)
+                        .padding(top = (-4).dp, start = 15.dp), // Ajusta estos valores a tu gusto
+                    shape = RoundedCornerShape(16.dp)
+                )
+
 
                 Spacer(modifier = Modifier.weight(0.1f))
 

@@ -12,6 +12,6 @@ data class TurnoDTO(
     @Serializable(with = LocalDateTimeSerializer::class)
     val fechaHora: LocalDateTime,
     val duracion: Int,
-    val idEstado: Long,
+    val idEstado: Long = 10,
     val observaciones: String? = null
 )

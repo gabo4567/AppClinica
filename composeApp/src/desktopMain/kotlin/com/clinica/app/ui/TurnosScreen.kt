@@ -22,6 +22,8 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.ui.unit.sp
 import com.clinica.app.network.*
 import kotlinx.coroutines.delay
+import com.clinica.app.network.EditarTurnoDTO
+
 
 fun nombreEspecialidadPorId(idEspecialidad: Long?): String {
     return when (idEspecialidad) {
@@ -46,6 +48,9 @@ fun TurnosScreen() {
     var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
 
     var mostrarDialogoNuevoTurno by remember { mutableStateOf(false) }
+
+    var mostrarDialogoEditarTurno by remember { mutableStateOf(false) }
+    var turnoParaEditar by remember { mutableStateOf<TurnoDTO?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -149,6 +154,17 @@ fun TurnosScreen() {
                 snackbarHostState.showSnackbar("Error al cancelar turno")
             }
         }
+    }
+
+    fun EditarTurnoDTO.toRegistroTurnoDTO(): RegistroTurnoDTO {
+        return RegistroTurnoDTO(
+            idPaciente = this.idPaciente,
+            idProfesional = this.idProfesional,
+            fechaHora = this.fechaHora,
+            duracion = this.duracion,
+            idEstado = this.idEstado,
+            observaciones = this.observaciones
+        )
     }
 
     Scaffold(
@@ -378,8 +394,9 @@ fun TurnosScreen() {
                                 mostrarDialogoConfirmacion = true
                             },
                             onModificarClick = { turnoAModificar ->
-                                println("Modificar turno: ${turnoAModificar.comprobante}")
-                                // Aquí podés abrir un diálogo o navegar a pantalla de edición
+                                println("DEBUG - Turno seleccionado para editar ID: ${turnoAModificar.id}")
+                                turnoParaEditar = turnoAModificar
+                                mostrarDialogoEditarTurno = true
                             },
                             nombrePaciente = nombrePaciente,
                             nombreProfesional = nombreProfesional,
@@ -449,6 +466,49 @@ fun TurnosScreen() {
             )
         }
 
+        if (mostrarDialogoEditarTurno && turnoParaEditar != null) {
+            val profesionalDelTurno = profesionales.find { it.idPersona == turnoParaEditar!!.idProfesional }
+
+            if (profesionalDelTurno != null) {
+                EditarTurnoForm(
+                    turnoOriginal = turnoParaEditar!!,
+                    profesionalDelTurno = profesionalDelTurno,
+                    profesionales = profesionales,
+                    onConfirmar = { turnoModificado: EditarTurnoDTO ->
+                        println("DEBUG - ID turno modificado: ${turnoModificado.id}")
+                        println("DEBUG - DTO sin ID (RegistroTurnoDTO): ${turnoModificado.toRegistroTurnoDTO()}")
+                        scope.launch {
+                            val exito = try {
+                                TurnoApi.actualizarTurno(turnoModificado.id, turnoModificado.toRegistroTurnoDTO())
+                            } catch (e: Exception) {
+                                println("DEBUG - Excepción al actualizar turno: ${e.message}")
+                                snackbarHostState.showSnackbar("Error al actualizar turno: ${e.message}")
+                                false
+                            }
+
+                            if (exito) {
+                                mostrarDialogoEditarTurno = false
+                                mensajeExito = "Turno actualizado correctamente"
+                                cargarTurnos()
+                            } else {
+                                println("DEBUG - Falló la actualización del turno")
+                                snackbarHostState.showSnackbar("Error al actualizar turno")
+                            }
+                        }
+                    },
+                    onCancelar = { mostrarDialogoEditarTurno = false },
+                    obtenerFechasDisponiblesApi = { idProfesional ->
+                        HorarioDisponibleApi.obtenerFechasDisponibles(idProfesional)
+                    },
+                    obtenerHorariosDisponiblesApi = { idProfesional, fecha ->
+                        HorarioDisponibleApi.obtenerHorariosDisponibles(idProfesional, fecha)
+                    }
+                )
+            } else {
+                // Profesional no encontrado
+                Text("No se pudo cargar el profesional del turno.")
+            }
+        }
 
     }
 
