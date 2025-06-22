@@ -459,7 +459,7 @@ fun PacientesHeader() {
             Text(
                 "Dirección",
                 modifier = Modifier
-                    .padding(start = 140.dp),
+                    .padding(start = 130.dp),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Start
             )
