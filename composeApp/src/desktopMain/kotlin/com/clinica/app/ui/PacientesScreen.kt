@@ -175,18 +175,15 @@ fun PacientesScreen() {
                     Text("Inactivos", fontSize = 16.sp)
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
-
                 OutlinedTextField(
                     value = filtroDniPaciente,
                     onValueChange = { filtroDniPaciente = it },
                     label = { Text("Filtrar Paciente (DNI)") },
                     modifier = Modifier
-                        .width(225.dp)
-                        .padding(top = (-4).dp, start = 15.dp), // Ajusta estos valores a tu gusto
+                        .width(240.dp)
+                        .padding(top = 1.dp, start = 15.dp), // Ajusta estos valores a tu gusto
                     shape = RoundedCornerShape(16.dp)
                 )
-
 
                 Spacer(modifier = Modifier.weight(0.1f))
 

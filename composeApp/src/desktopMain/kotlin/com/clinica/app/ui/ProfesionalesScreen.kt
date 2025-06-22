@@ -59,6 +59,11 @@ fun ProfesionalesScreen() {
     var profesionalAEliminar by remember { mutableStateOf<ProfesionalDTO?>(null) }
     var isProcessingEliminar by remember { mutableStateOf(false) }
 
+    var filtroDniProfesional by remember { mutableStateOf("") }
+    var filtroEspecialidad by remember { mutableStateOf("Todos") }
+
+    val especialidadesOpciones = listOf("Todos") + especialidadesMap.values.toList()
+
     val profesionales = remember { mutableStateListOf<ProfesionalDTO>() }
 
     val scope = rememberCoroutineScope()
@@ -122,7 +127,7 @@ fun ProfesionalesScreen() {
                     Text("Todos", fontSize = 16.sp)
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(5.dp))
 
                 Button(
                     onClick = { estadoFiltro = 1L },
@@ -141,7 +146,7 @@ fun ProfesionalesScreen() {
                     Text("Activos", fontSize = 16.sp)
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(5.dp))
 
                 Button(
                     onClick = { estadoFiltro = 2L },
@@ -159,6 +164,32 @@ fun ProfesionalesScreen() {
                 ) {
                     Text("Inactivos", fontSize = 16.sp)
                 }
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                OutlinedTextField(
+                    value = filtroDniProfesional,
+                    onValueChange = { filtroDniProfesional = it },
+                    label = { Text("Filtrar Profesional (DNI)") },
+                    modifier = Modifier
+                        .width(225.dp)
+                        .padding(start = 8.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    singleLine = true,
+                    readOnly = false
+                )
+
+                Spacer(modifier = Modifier.width(5.dp))
+
+                DropdownFiltro(
+                    label = "Filtrar por Especialidad",
+                    opciones = especialidadesOpciones,
+                    seleccion = filtroEspecialidad,
+                    onSeleccion = { filtroEspecialidad = it },
+                    modifier = Modifier
+                        .width(200.dp)
+                        .padding(start = 8.dp)
+                )
 
                 Spacer(modifier = Modifier.weight(0.1f))
 
@@ -191,7 +222,15 @@ fun ProfesionalesScreen() {
 
             // Aplicar filtro de estado si corresponde
             val profesionalesFiltrados = profesionales.filter { profesional ->
-                estadoFiltro == null || profesional.idEstado == estadoFiltro
+                val cumpleEstado = estadoFiltro == null || profesional.idEstado == estadoFiltro
+
+                val cumpleDni = filtroDniProfesional.isBlank() || profesional.dni.contains(filtroDniProfesional, ignoreCase = true)
+
+                val nombreEspecialidad = profesional.idEspecialidad?.let { especialidadesMap[it] } ?: ""
+
+                val cumpleEspecialidad = filtroEspecialidad == "Todos" || nombreEspecialidad == filtroEspecialidad
+
+                cumpleEstado && cumpleDni && cumpleEspecialidad
             }
 
             // Renderizar lista de profesionales
@@ -496,5 +535,3 @@ fun ProfesionalItem(
         }
     }
 }
-
-
