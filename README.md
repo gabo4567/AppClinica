@@ -48,16 +48,17 @@ La interfaz fue desarrollada con **Kotlin Multiplatform + Compose Desktop**, enf
 - Visualización de la agenda médica diaria.
 
 ### 📊 Informes de Gestión
-- **Cantidad de turnos atendidos por profesional** en un período determinado.
-- **Reporte de turnos cancelados y reprogramados**.
-- Informes personalizados definidos por la clínica (Ej: Tasa de cancelación por especialidad, distribución de turnos por área médica, etc.).
+- **Cantidad de turnos atendidos por profesional**
+- **Cantidad de turnos atendidos según una fecha**
+- **Cantidad de turnos solicitados por paciente**.
+- Informes personalizados definidos por la clínica, por ejemplo, distribución de turnos por área médica
 
 ---
 
 ## 🚀 Estructura del Proyecto
 com.clinica
 ├── login # Pantalla de login (secretaria)
-├── screens # Pantallas de cada módulo (Inicio, Pacientes, Turnos, etc.)
+├── screens # Pantallas de cada módulo (Inicio, Pacientes, Turnos, Profesionales, Especialidades)
 ├── models # Modelos de datos (DTOs y entidades)
 ├── services # Servicios REST para consumir la API
 ├── utils # Funciones de ayuda, validaciones, etc.
