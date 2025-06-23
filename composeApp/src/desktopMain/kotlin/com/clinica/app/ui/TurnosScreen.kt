@@ -489,24 +489,39 @@ fun TurnosScreen() {
             )
         }
 
-
         if (mostrarDialogoEditarTurno && turnoParaEditar != null) {
-            val profesionalDelTurno = profesionales.find { it.idPersona == turnoParaEditar!!.idProfesional }
+            val turnoNoNulo = turnoParaEditar!!  // ✅ Cast seguro porque ya verificaste que no es null
+            val profesionalDelTurno = profesionales.find { it.idPersona == turnoNoNulo.idProfesional }
 
             if (profesionalDelTurno != null) {
                 EditarTurnoForm(
-                    turnoOriginal = turnoParaEditar!!,
+                    turnoOriginal = turnoNoNulo,
                     profesionalDelTurno = profesionalDelTurno,
                     profesionales = profesionales,
                     onConfirmar = { turnoModificado: EditarTurnoDTO ->
                         println("DEBUG - ID turno modificado: ${turnoModificado.id}")
                         println("DEBUG - DTO sin ID (RegistroTurnoDTO): ${turnoModificado.toRegistroTurnoDTO()}")
                         scope.launch {
-                            val exito = try {
-                                TurnoApi.actualizarTurno(turnoModificado.id, turnoModificado.toRegistroTurnoDTO())
+                            val resultado = try {
+                                TurnoApi.actualizarTurno(
+                                    turnoModificado.id,
+                                    turnoModificado.toRegistroTurnoDTO()
+                                )
                             } catch (e: Exception) {
-                                println("DEBUG - Excepción al actualizar turno: ${e.message}")
-                                snackbarHostState.showSnackbar("Error al actualizar turno: ${e.message}")
+                                val mensajeError = e.message ?: "Error desconocido"
+                                println("DEBUG - Excepción al actualizar turno: $mensajeError")
+                                snackbarHostState.showSnackbar("Error al actualizar turno: $mensajeError")
+                                return@launch
+                            }
+
+                            val exito = resultado.getOrElse { e ->
+                                val mensajeError = e.message ?: "Error desconocido"
+                                println("DEBUG - Error al actualizar turno (getOrElse): $mensajeError")
+                                if (mensajeError.contains("Turno superpuesto", ignoreCase = true)) {
+                                    snackbarHostState.showSnackbar("No se puede modificar turno: ya hay uno reservado en ese horario.")
+                                } else {
+                                    snackbarHostState.showSnackbar("Error al actualizar turno: $mensajeError")
+                                }
                                 false
                             }
 
@@ -514,9 +529,6 @@ fun TurnosScreen() {
                                 mostrarDialogoEditarTurno = false
                                 mensajeExito = "Turno actualizado correctamente"
                                 cargarTurnos()
-                            } else {
-                                println("DEBUG - Falló la actualización del turno")
-                                snackbarHostState.showSnackbar("Error al actualizar turno")
                             }
                         }
                     },
@@ -529,12 +541,13 @@ fun TurnosScreen() {
                     }
                 )
             } else {
-                // Profesional no encontrado
                 Text("No se pudo cargar el profesional del turno.")
             }
         }
 
         if (mostrarDialogoAtendido && turnoParaActualizar != null) {
+            val turnoNoNulo = turnoParaActualizar!!  // ✅ Smart cast explícito
+
             AlertDialog(
                 onDismissRequest = {
                     mostrarDialogoAtendido = false
@@ -544,20 +557,35 @@ fun TurnosScreen() {
                 text = { Text("¿Deseas marcar este turno como atendido?") },
                 confirmButton = {
                     TextButton(onClick = {
-                        // Cambiar estado a 13 (atendido)
-                        val turnoAtendido = turnoParaActualizar!!.copy(idEstado = 13)
+                        val turnoAtendido = turnoNoNulo.copy(idEstado = 13L)
+
                         scope.launch {
-                            val exito = try {
-                                TurnoApi.actualizarTurno(turnoAtendido.id!!, RegistroTurnoDTO(
-                                    idPaciente = turnoAtendido.idPaciente,
-                                    idProfesional = turnoAtendido.idProfesional,
-                                    fechaHora = turnoAtendido.fechaHora.toString(),
-                                    duracion = turnoAtendido.duracion,
-                                    idEstado = 13,
-                                    observaciones = turnoAtendido.observaciones
-                                ))
+                            val resultado = try {
+                                TurnoApi.actualizarTurno(
+                                    turnoAtendido.id!!,
+                                    RegistroTurnoDTO(
+                                        idPaciente = turnoAtendido.idPaciente,
+                                        idProfesional = turnoAtendido.idProfesional,
+                                        fechaHora = turnoAtendido.fechaHora.toString(),
+                                        duracion = turnoAtendido.duracion,
+                                        idEstado = 13L,
+                                        observaciones = turnoAtendido.observaciones
+                                    )
+                                )
                             } catch (e: Exception) {
-                                snackbarHostState.showSnackbar("Error al actualizar turno: ${e.message}")
+                                val mensaje = e.message ?: "Error desconocido"
+                                snackbarHostState.showSnackbar("Error al actualizar turno: $mensaje")
+                                return@launch
+                            }
+
+                            val exito = resultado.getOrElse { e ->
+                                val mensajeError = e.message ?: "Error desconocido"
+                                println("DEBUG - Error al marcar como atendido: $mensajeError")
+                                if (mensajeError.contains("Turno superpuesto", ignoreCase = true)) {
+                                    snackbarHostState.showSnackbar("No se puede marcar como atendido: ya hay un turno en ese horario.")
+                                } else {
+                                    snackbarHostState.showSnackbar("Error al actualizar turno: $mensajeError")
+                                }
                                 false
                             }
 
@@ -566,6 +594,7 @@ fun TurnosScreen() {
                                 cargarTurnos()
                             }
                         }
+
                         mostrarDialogoAtendido = false
                         turnoParaActualizar = null
                     }) {
@@ -582,6 +611,7 @@ fun TurnosScreen() {
                 }
             )
         }
+
 
 
     }

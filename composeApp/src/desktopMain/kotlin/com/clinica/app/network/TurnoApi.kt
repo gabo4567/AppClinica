@@ -78,19 +78,28 @@ object TurnoApi {
     }
 
 
-    suspend fun actualizarTurno(id: Long, dto: RegistroTurnoDTO): Boolean {
-        println("DEBUG - Actualizando turno con ID: $id y DTO: $dto")
+    suspend fun actualizarTurno(id: Long, dto: RegistroTurnoDTO): Result<Boolean> {
         val client = KtorClientConfig.config
 
-        val response: HttpResponse = client.put("http://localhost:8080/api/turnos/$id") {
-            contentType(ContentType.Application.Json)
-            setBody(dto)
+        return try {
+            val response: HttpResponse = client.put("http://localhost:8080/api/turnos/$id") {
+                contentType(ContentType.Application.Json)
+                setBody(dto)
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                Result.success(true)
+            } else {
+                Result.failure(Exception("El horario seleccionado ya fue reservado anteriormente"))
+            }
+        } catch (e: ClientRequestException) {
+            val errorBody = e.response.bodyAsText()
+            Result.failure(Exception(errorBody))
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-
-        println("DEBUG - Respuesta status: ${response.status}")
-
-        return response.status == HttpStatusCode.OK
     }
+
 
     suspend fun cancelarTurno(turno: TurnoDTO): Boolean {
         val client = KtorClientConfig.config
