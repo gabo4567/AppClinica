@@ -1,8 +1,6 @@
 package com.clinica.app.network
 
-import com.clinica.app.models.CantidadTurnosPorDiaDTO
-import com.clinica.app.models.CantidadTurnosPorProfesionalDTO
-import com.clinica.app.models.PacientesAtendidosPorEspecialidadDTO
+import com.clinica.app.models.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -12,12 +10,13 @@ import java.time.LocalDate
 import kotlinx.serialization.json.Json
 
 object ReporteApi {
-    suspend fun obtenerCantidadTurnosPorDia(fechaInicio: LocalDate, fechaFin: LocalDate): List<CantidadTurnosPorDiaDTO> {
+    suspend fun obtenerCantidadTurnosPorDia(fechaInicio: LocalDate, fechaFin: LocalDate): ResultadoTurnosPorDiaDTO {
         val client = KtorClientConfig.config
         val url = "http://localhost:8080/api/turnos/reportes/turnos-por-dia?fechaInicio=$fechaInicio&fechaFin=$fechaFin"
         val response = client.get(url)
         return response.body()
     }
+
 
     suspend fun obtenerCantidadTurnosPorProfesional(
         fechaInicio: LocalDate,
@@ -53,6 +52,25 @@ object ReporteApi {
         val url = "$baseUrl?${params.joinToString("&")}"
 
         val responseString = client.get(url).bodyAsText()
+        return Json { ignoreUnknownKeys = true }.decodeFromString(responseString)
+    }
+
+    suspend fun obtenerTurnosPorEstado(
+        especialidad: String?,
+        estadoTurno: String?,
+        fechaInicio: LocalDate,
+        fechaFin: LocalDate
+    ): List<TurnosPorEstadoDTO> {
+        val client = KtorClientConfig.config
+
+        val especialidadEncoded = URLEncoder.encode(especialidad ?: "", StandardCharsets.UTF_8.toString())
+        val estadoEncoded = URLEncoder.encode(estadoTurno ?: "", StandardCharsets.UTF_8.toString())
+
+        val url = "http://localhost:8080/api/turnos/reportes/turnos-por-estado" +
+                "?especialidad=$especialidadEncoded&estado=$estadoEncoded&fechaInicio=$fechaInicio&fechaFin=$fechaFin"
+
+        val responseString = client.get(url).bodyAsText()
+
         return Json { ignoreUnknownKeys = true }.decodeFromString(responseString)
     }
 

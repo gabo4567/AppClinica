@@ -381,7 +381,6 @@ fun TurnosScreen() {
                     Spacer(modifier = Modifier.width(100.dp)) // Para el botón cancelar
                 }
 
-                // Divider()
 
                 LazyColumn {
                     items(turnosFiltrados) { turno ->
@@ -678,10 +677,10 @@ fun TurnoRowItem(
             onClick = { onMarcarComoAtendidoClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)), // Verde
             modifier = Modifier
-                .width(110.dp)
+                .width(70.dp)
                 .padding(end = 6.dp)
         ) {
-            Text("Atendido", fontSize = 12.sp)
+            Text("At.", fontSize = 12.sp)
         }
 
         //  Botón "Modificar"
@@ -689,19 +688,19 @@ fun TurnoRowItem(
             onClick = { onModificarClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
             modifier = Modifier
-                .width(110.dp)
+                .width(85.dp)
                 .padding(end = 6.dp)
         ) {
-            Text("Modificar", fontSize = 12.sp)
+            Text("Mod.", fontSize = 12.sp)
         }
 
         //  Botón "Cancelar"
         Button(
             onClick = { onCancelarClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier.width(75.dp)
         ) {
-            Text("Cancelar", fontSize = 12.sp)
+            Text("Can.", fontSize = 12.sp)
         }
     }
 

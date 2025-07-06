@@ -7,7 +7,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.clinica.app.models.CantidadTurnosPorDiaDTO
 import com.clinica.app.network.ReporteApi
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -20,6 +19,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.ui.unit.sp
 import com.clinica.app.models.PacientesAtendidosPorEspecialidadDTO
+import com.clinica.app.models.TurnosPorEstadoDTO
+import com.clinica.app.models.ResultadoTurnosPorDiaDTO
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -33,13 +34,13 @@ fun InformesScreen() {
 
 
     // Variables para el primer informe
-    var resultadosTurnosPorDia by remember { mutableStateOf<List<CantidadTurnosPorDiaDTO>>(emptyList()) }
+    var resultadosTurnosPorDia by remember { mutableStateOf(ResultadoTurnosPorDiaDTO(emptyList(), 0L)) }
     var errorTurnosPorDia by remember { mutableStateOf<String?>(null) }
-    var fechaInicioTexto by remember { mutableStateOf(LocalDate.now().minusDays(7).toString()) }
+    var fechaInicioTexto by remember { mutableStateOf(LocalDate.now().minusDays(14).toString()) }
     var fechaFinTexto by remember { mutableStateOf(LocalDate.now().toString()) }
 
     // Variables para el segundo informe
-    var fechaInicioProfTexto by remember { mutableStateOf(LocalDate.now().minusDays(7).toString()) }
+    var fechaInicioProfTexto by remember { mutableStateOf(LocalDate.now().minusDays(14).toString()) }
     var fechaFinProfTexto by remember { mutableStateOf(LocalDate.now().toString()) }
     var filtroNombreProf by remember { mutableStateOf("") }  // Para el filtro por nombre o apellido
     var resultadosTurnosPorProfesional by remember { mutableStateOf<List<CantidadTurnosPorProfesionalDTO>>(emptyList()) }
@@ -47,10 +48,24 @@ fun InformesScreen() {
 
     // Variables para el tercer informe
     var filtroEspecialidad by remember { mutableStateOf("") }
-    var fechaInicioEspecialidad by remember { mutableStateOf(LocalDate.now().minusDays(7).toString()) }
+    var fechaInicioEspecialidad by remember { mutableStateOf(LocalDate.now().minusDays(14).toString()) }
     var fechaFinEspecialidad by remember { mutableStateOf(LocalDate.now().toString()) }
     var resultadosPacientesPorEspecialidad by remember { mutableStateOf<List<PacientesAtendidosPorEspecialidadDTO>>(emptyList()) }
     var errorPacientesPorEspecialidad by remember { mutableStateOf<String?>(null) }
+
+    // Variables para el cuarto informe
+    val estados = listOf("Todos", "Cancelado", "Reprogramado", "Atendido")
+
+    var especialidadSeleccionadaEstado by remember { mutableStateOf(especialidades[0]) }
+    var estadoSeleccionado by remember { mutableStateOf(estados[0]) }
+    var fechaInicioEstadoTexto by remember { mutableStateOf(LocalDate.now().minusDays(14).toString()) }
+    var fechaFinEstadoTexto by remember { mutableStateOf(LocalDate.now().toString()) }
+
+    var resultadosTurnosPorEstado by remember { mutableStateOf<List<TurnosPorEstadoDTO>>(emptyList()) }
+    var errorTurnosPorEstado by remember { mutableStateOf<String?>(null) }
+
+    var expandedEspecialidadEstado by remember { mutableStateOf(false) }
+    var expandedEstadoTurno by remember { mutableStateOf(false) }
 
 
     Column(
@@ -108,10 +123,11 @@ fun InformesScreen() {
                         try {
                             val fechaInicio = LocalDate.parse(fechaInicioTexto)
                             val fechaFin = LocalDate.parse(fechaFinTexto)
+
                             resultadosTurnosPorDia = ReporteApi.obtenerCantidadTurnosPorDia(fechaInicio, fechaFin)
                         } catch (e: Exception) {
                             errorTurnosPorDia = "Error al obtener datos: ${e.message}"
-                            resultadosTurnosPorDia = emptyList()
+                            resultadosTurnosPorDia = ResultadoTurnosPorDiaDTO(emptyList(), 0L)
                         }
                     }
                 },
@@ -127,9 +143,9 @@ fun InformesScreen() {
             Text(errorTurnosPorDia!!, color = MaterialTheme.colors.error)
         }
 
-        if (resultadosTurnosPorDia.isNotEmpty()) {
+        if (resultadosTurnosPorDia.turnosPorDia.isNotEmpty()) {
 
-            Spacer(modifier = Modifier.height(12.dp)) // 🔹 Más lejos de los campos de fecha
+            Spacer(modifier = Modifier.height(12.dp)) // Más lejos de los campos de fecha
 
             Row(
                 modifier = Modifier
@@ -139,11 +155,12 @@ fun InformesScreen() {
                 Text(
                     text = "Fecha del Turno",
                     style = MaterialTheme.typography.subtitle2,
-                    modifier = Modifier.padding(end = 555.dp)
+                    modifier = Modifier.weight(0.86f) // mejor usar weight que padding fijo
                 )
                 Text(
                     text = "Cantidad de Turnos",
-                    style = MaterialTheme.typography.subtitle2
+                    style = MaterialTheme.typography.subtitle2,
+                    modifier = Modifier.weight(1f)
                 )
             }
 
@@ -151,9 +168,30 @@ fun InformesScreen() {
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 200.dp)
-                    .padding(top = 4.dp) // 🔹 Más cerca del encabezado
+                    .padding(top = 4.dp)
             ) {
-                items(resultadosTurnosPorDia) { item ->
+                // Fila para el total primero
+                item {
+                    Divider(thickness = 2.dp)
+                    Row(Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)) {
+                        Text(
+                            text = "TOTAL",
+                            style = MaterialTheme.typography.subtitle1,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = resultadosTurnosPorDia.totalTurnos.toString(),
+                            style = MaterialTheme.typography.subtitle1,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Divider(thickness = 2.dp)
+                }
+
+                // Mostrar los turnos por día después
+                items(resultadosTurnosPorDia.turnosPorDia) { item ->
                     Row(Modifier.fillMaxWidth().padding(8.dp)) {
                         Text(item.fecha.toString(), modifier = Modifier.weight(1f))
                         Text(item.cantidad.toString(), modifier = Modifier.weight(1f))
@@ -253,7 +291,7 @@ fun InformesScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text("Informe: Pacientes Atendidos por Especialidad", style = MaterialTheme.typography.h6)
+        Text("Informe: Turnos solicitados por Especialidad", style = MaterialTheme.typography.h6)
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -352,7 +390,7 @@ fun InformesScreen() {
                     modifier = Modifier.padding(end = 575.dp) // Ajustar según ancho de pantalla
                 )
                 Text(
-                    text = "Cantidad de Pacientes",
+                    text = "Cantidad de Turnos",
                     style = MaterialTheme.typography.subtitle2
                 )
             }
@@ -373,6 +411,144 @@ fun InformesScreen() {
                 }
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text("Informe: Turnos Cancelados o Reprogramados", style = MaterialTheme.typography.h6)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Dropdown de Especialidad
+            ExposedDropdownMenuBox(
+                expanded = expandedEspecialidadEstado,
+                onExpandedChange = { expandedEspecialidadEstado = !expandedEspecialidadEstado },
+                modifier = Modifier.weight(1f)
+            ) {
+                OutlinedTextField(
+                    value = especialidadSeleccionadaEstado,
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text("Especialidad") },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedEspecialidadEstado) },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                ExposedDropdownMenu(
+                    expanded = expandedEspecialidadEstado,
+                    onDismissRequest = { expandedEspecialidadEstado = false }
+                ) {
+                    especialidades.forEach { opcion ->
+                        DropdownMenuItem(
+                            onClick = {
+                                especialidadSeleccionadaEstado = opcion
+                                expandedEspecialidadEstado = false
+                            }
+                        ) {
+                            Text(opcion)
+                        }
+                    }
+                }
+            }
+
+            // Spacer que simula el botón "Buscar"
+            Spacer(modifier = Modifier.width(82.dp))
+        }
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedTextField(
+                value = fechaInicioEstadoTexto,
+                onValueChange = { fechaInicioEstadoTexto = it },
+                label = { Text("Fecha inicio") },
+                modifier = Modifier.weight(1f)
+            )
+
+            OutlinedTextField(
+                value = fechaFinEstadoTexto,
+                onValueChange = { fechaFinEstadoTexto = it },
+                label = { Text("Fecha fin") },
+                modifier = Modifier.weight(1f)
+            )
+
+            Button(
+                onClick = {
+                    scope.launch {
+                        errorTurnosPorEstado = null
+                        try {
+                            val fechaInicio = LocalDate.parse(fechaInicioEstadoTexto)
+                            val fechaFin = LocalDate.parse(fechaFinEstadoTexto)
+
+                            resultadosTurnosPorEstado = ReporteApi.obtenerTurnosPorEstado(
+                                especialidadSeleccionadaEstado,
+                                estadoSeleccionado,
+                                fechaInicio,
+                                fechaFin
+                            )
+                        } catch (e: Exception) {
+                            errorTurnosPorEstado = "Error al obtener datos: ${e.message}"
+                            resultadosTurnosPorEstado = emptyList()
+                        }
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(backgroundColor = azulOscuro)
+            ) {
+                Text("Buscar", color = Color.White)
+            }
+        }
+
+        if (errorTurnosPorEstado != null) {
+            Text(errorTurnosPorEstado!!, color = MaterialTheme.colors.error)
+        }
+
+        if (resultadosTurnosPorEstado.isNotEmpty()) {
+
+            Spacer(modifier = Modifier.height(12.dp)) // Separación desde los campos
+
+            // ---------- Encabezado ----------
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text("Especialidad", style = MaterialTheme.typography.subtitle2, modifier = Modifier.weight(2f))
+                Text("Total", style = MaterialTheme.typography.subtitle2, modifier = Modifier.weight(1f))
+                Text("Cancelados", style = MaterialTheme.typography.subtitle2, modifier = Modifier.weight(2f))
+                Text("Reprogramados", style = MaterialTheme.typography.subtitle2, modifier = Modifier.weight(2f))
+                Text("Atendidos", style = MaterialTheme.typography.subtitle2, modifier = Modifier.weight(2f))
+            }
+
+            // ---------- Datos ----------
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 240.dp)
+                    .padding(top = 4.dp)
+            ) {
+                items(resultadosTurnosPorEstado) { item ->
+                    val total = item.totalTurnos.toDouble().takeIf { it > 0 } ?: 1.0
+
+                    val canceladosTexto = "${item.cancelados} (${((item.cancelados * 100) / total).toInt()}%)"
+                    val reprogramadosTexto = "${item.reprogramados} (${((item.reprogramados * 100) / total).toInt()}%)"
+                    val atendidosTexto = "${item.atendidos} (${((item.atendidos * 100) / total).toInt()}%)"
+
+                    Row(Modifier.fillMaxWidth().padding(8.dp)) {
+                        Text(item.especialidad, modifier = Modifier.weight(2f))
+                        Text(item.totalTurnos.toString(), modifier = Modifier.weight(1f))
+                        Text(canceladosTexto, modifier = Modifier.weight(2f))
+                        Text(reprogramadosTexto, modifier = Modifier.weight(2f))
+                        Text(atendidosTexto, modifier = Modifier.weight(2f))
+                    }
+                    Divider()
+                }
+            }
+        }
+
 
 
 
