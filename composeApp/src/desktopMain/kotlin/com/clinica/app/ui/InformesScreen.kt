@@ -349,7 +349,7 @@ fun InformesScreen() {
                 Text(
                     text = "Especialidad",
                     style = MaterialTheme.typography.subtitle2,
-                    modifier = Modifier.padding(end = 520.dp) // Ajustar según ancho de pantalla
+                    modifier = Modifier.padding(end = 575.dp) // Ajustar según ancho de pantalla
                 )
                 Text(
                     text = "Cantidad de Pacientes",
