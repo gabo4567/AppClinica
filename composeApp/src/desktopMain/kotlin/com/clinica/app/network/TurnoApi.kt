@@ -31,29 +31,6 @@ object TurnoApi {
         return response.body()
     }
 
-    /*suspend fun crearTurno(dto: RegistroTurnoDTO): Result<Boolean> {
-        val client = KtorClientConfig.config
-
-        return try {
-            val response: HttpResponse = client.post("http://localhost:8080/api/turnos") {
-                contentType(ContentType.Application.Json)
-                setBody(dto)
-            }
-            if (response.status == HttpStatusCode.Created || response.status == HttpStatusCode.OK) {
-                Result.success(true)
-            } else {
-                Result.failure(Exception("Error inesperado al crear turno"))
-            }
-        } catch (e: ClientRequestException) {
-            // Aquí capturamos errores HTTP 4xx
-            val errorBody = e.response.bodyAsText()
-            // Podés parsear o directamente devolver el mensaje para mostrarlo
-            Result.failure(Exception("Error al crear turno: $errorBody"))
-        } catch (e: Exception) {
-            // Otros errores, como problemas de red
-            Result.failure(e)
-        }
-    }*/
 
     suspend fun crearTurno(dto: RegistroTurnoDTO): Result<Boolean> {
         val client = KtorClientConfig.config

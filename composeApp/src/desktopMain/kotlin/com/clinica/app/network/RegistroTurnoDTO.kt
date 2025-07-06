@@ -1,7 +1,5 @@
 package com.clinica.app.network
 
-// import com.clinica.app.models.LocalDateTimeSerializer
-// import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 @Serializable

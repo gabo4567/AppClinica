@@ -19,6 +19,7 @@ enum class MenuOption(val label: String) {
     TURNOS("Turnos"),
     PROFESIONALES("Profesionales"),
     ESPECIALIDADES("Especialidades"),
+    INFORMES("Informes"),
     LOGOUT("Cerrar sesión")
 }
 
@@ -108,6 +109,7 @@ fun MainScreen(onLogout: () -> Unit) {
                     MenuOption.TURNOS -> TurnosScreen()
                     MenuOption.PROFESIONALES -> ProfesionalesScreen()
                     MenuOption.ESPECIALIDADES -> EspecialidadScreen()
+                    MenuOption.INFORMES -> InformesScreen()
                     else -> {}
                 }
             }
