@@ -23,17 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.clinica.app.network.*
 import kotlinx.coroutines.delay
 import com.clinica.app.network.EditarTurnoDTO
-
-
-fun nombreEspecialidadPorId(idEspecialidad: Long?): String {
-    return when (idEspecialidad) {
-        1L -> "Clínica General"
-        2L -> "Pediatría"
-        3L -> "Cardiología"
-        4L -> "Ginecología"
-        else -> "Desconocida"
-    }
-}
+import com.clinica.app.network.TurnoApi.actualizarEstadoTurno
 
 @Composable
 fun TurnosScreen() {
@@ -43,6 +33,9 @@ fun TurnosScreen() {
 
     var profesionales by remember { mutableStateOf<List<ProfesionalDTO>>(emptyList()) }
     var pacientes by remember { mutableStateOf<List<Paciente>>(emptyList()) }
+
+    var turnoParaProgramar by remember { mutableStateOf<TurnoDTO?>(null) }
+    var mostrarDialogoProgramar by remember { mutableStateOf(false) }
 
     var turnoParaCancelar by remember { mutableStateOf<TurnoDTO?>(null) }
     var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
@@ -169,6 +162,50 @@ fun TurnosScreen() {
             observaciones = this.observaciones
         )
     }
+
+    fun programarTurno(turno: TurnoDTO) {
+        val id = turno.id
+        if (id == null) {
+            scope.launch {
+                snackbarHostState.showSnackbar("ID de turno inválido")
+            }
+            return
+        }
+
+        if (turno.idEstado == 10L) {
+            scope.launch {
+                snackbarHostState.showSnackbar("Este turno ya ha sido programado")
+            }
+            return
+        }
+
+        if (turno.idEstado != 9L) {
+            scope.launch {
+                snackbarHostState.showSnackbar("Solo se puede programar un turno confirmado")
+            }
+            return
+        }
+
+        scope.launch {
+            val resultado = try {
+                actualizarEstadoTurno(id, 10L)
+            } catch (e: Exception) {
+                snackbarHostState.showSnackbar("Error al programar turno: ${e.message ?: "Error desconocido"}")
+                return@launch
+            }
+
+            val exito = resultado.getOrElse { error ->
+                snackbarHostState.showSnackbar("Error al programar turno: ${error.message ?: "Error desconocido"}")
+                false
+            }
+
+            if (exito) {
+                mensajeExito = "Turno programado correctamente"
+                cargarTurnos()
+            }
+        }
+    }
+
 
     Scaffold(
         snackbarHost = {
@@ -381,7 +418,6 @@ fun TurnosScreen() {
                     Spacer(modifier = Modifier.width(100.dp)) // Para el botón cancelar
                 }
 
-
                 LazyColumn {
                     items(turnosFiltrados) { turno ->
                         val nombrePaciente = nombrePacientePorId(turno.idPaciente)
@@ -403,6 +439,20 @@ fun TurnosScreen() {
                             onMarcarComoAtendidoClick = { turnoAMarcar ->
                                 turnoParaActualizar = turnoAMarcar
                                 mostrarDialogoAtendido = true
+                            },
+                            onProgramarClick = { turnoAProgramar ->
+                                if (turnoAProgramar.idEstado == 9L) {
+                                    turnoParaProgramar = turnoAProgramar
+                                    mostrarDialogoProgramar = true
+                                } else {
+                                    scope.launch {
+                                        val mensaje = when (turnoAProgramar.idEstado) {
+                                            10L -> "Este turno ya ha sido programado"
+                                            else -> "No se puede programar este turno porque no está confirmado."
+                                        }
+                                        snackbarHostState.showSnackbar(mensaje)
+                                    }
+                                }
                             },
                             nombrePaciente = nombrePaciente,
                             nombreProfesional = nombreProfesional,
@@ -611,6 +661,35 @@ fun TurnosScreen() {
             )
         }
 
+        if (mostrarDialogoProgramar && turnoParaProgramar != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    mostrarDialogoProgramar = false
+                    turnoParaProgramar = null
+                },
+                title = { Text("Confirmar programación") },
+                text = { Text("¿Estás seguro de que deseas programar este turno?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        programarTurno(turnoParaProgramar!!)
+                        mostrarDialogoProgramar = false
+                        turnoParaProgramar = null
+                    }) {
+                        Text("Confirmar", color = Color(0xFF4CAF50))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        mostrarDialogoProgramar = false
+                        turnoParaProgramar = null
+                    }) {
+                        Text("Cancelar", color = Color.Blue)
+                    }
+                }
+            )
+        }
+
+
 
 
     }
@@ -646,8 +725,9 @@ fun TurnosScreen() {
 fun TurnoRowItem(
     turno: TurnoDTO,
     onCancelarClick: (TurnoDTO) -> Unit,
-    onModificarClick: (TurnoDTO) -> Unit,  // NUEVO parámetro para el botón Modificar
+    onModificarClick: (TurnoDTO) -> Unit,
     onMarcarComoAtendidoClick: (TurnoDTO) -> Unit,
+    onProgramarClick: (TurnoDTO) -> Unit,
     nombrePaciente: String,
     nombreProfesional: String,
     dniPaciente: String,
@@ -672,18 +752,18 @@ fun TurnoRowItem(
                 .padding(start = 6.dp)
         )
 
-        //  Botón "Atendido" pequeño y verde
+        // ✅ 1. Botón "Programar"
         Button(
-            onClick = { onMarcarComoAtendidoClick(turno) },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)), // Verde
+            onClick = { onProgramarClick(turno) },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2196F3)), // Azul
             modifier = Modifier
-                .width(70.dp)
+                .width(85.dp)
                 .padding(end = 6.dp)
         ) {
-            Text("At.", fontSize = 12.sp)
+            Text("Prog.", fontSize = 12.sp)
         }
 
-        //  Botón "Modificar"
+        // ✅ 2. Botón "Modificar"
         Button(
             onClick = { onModificarClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -694,7 +774,18 @@ fun TurnoRowItem(
             Text("Mod.", fontSize = 12.sp)
         }
 
-        //  Botón "Cancelar"
+        // ✅ 3. Botón "Atendido"
+        Button(
+            onClick = { onMarcarComoAtendidoClick(turno) },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4CAF50)), // Verde
+            modifier = Modifier
+                .width(70.dp)
+                .padding(end = 6.dp)
+        ) {
+            Text("At.", fontSize = 12.sp)
+        }
+
+        // ✅ 4. Botón "Cancelar"
         Button(
             onClick = { onCancelarClick(turno) },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
@@ -703,8 +794,8 @@ fun TurnoRowItem(
             Text("Can.", fontSize = 12.sp)
         }
     }
-
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

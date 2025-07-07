@@ -1,5 +1,6 @@
 package com.clinica.app.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import java.time.LocalDateTime
 
@@ -12,6 +13,9 @@ data class TurnoDTO(
     @Serializable(with = LocalDateTimeSerializer::class)
     val fechaHora: LocalDateTime,
     val duracion: Int,
+
+    @SerialName("idEstado")  // ✅ Forzamos el nombre correcto
     val idEstado: Long = 10,
+
     val observaciones: String? = null
 )

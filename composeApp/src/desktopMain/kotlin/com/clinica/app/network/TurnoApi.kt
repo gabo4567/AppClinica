@@ -77,6 +77,27 @@ object TurnoApi {
         }
     }
 
+    suspend fun actualizarEstadoTurno(id: Long, idEstado: Long): Result<Boolean> {
+        val client = KtorClientConfig.config
+
+        return try {
+            val response: HttpResponse = client.patch("http://localhost:8080/api/turnos/$id/estado") {
+                parameter("idEstado", idEstado)
+            }
+
+            if (response.status == HttpStatusCode.OK) {
+                Result.success(true)
+            } else {
+                Result.failure(Exception("Error al actualizar estado del turno"))
+            }
+        } catch (e: ClientRequestException) {
+            val errorBody = e.response.bodyAsText()
+            Result.failure(Exception(errorBody))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     suspend fun cancelarTurno(turno: TurnoDTO): Boolean {
         val client = KtorClientConfig.config
