@@ -48,10 +48,10 @@ La interfaz fue desarrollada con **Kotlin Multiplatform + Compose Desktop**, enf
 - Visualización de la agenda médica diaria.
 
 ### 📊 Informes de Gestión
-- **Cantidad de turnos atendidos por profesional**
-- **Cantidad de turnos atendidos según una fecha**
-- **Cantidad de turnos solicitados por paciente**.
-- Informes personalizados definidos por la clínica, por ejemplo, distribución de turnos por área médica
+- **Cantidad de turnos solicitados en un rango de fechas**
+- **Cantidad de turnos por profesional**
+- **Cantidad de turnos solicitados por especialidad**.
+- **Cantidad de turnos cancelados o reprogramados**.
 
 ---
 
