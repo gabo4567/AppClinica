@@ -87,7 +87,7 @@ com.clinica
 
 ---
 
-##🔗 Comunicación con la API
+## 🔗 Comunicación con la API
 
 La app de escritorio se comunica directamente con los endpoints RESTful expuestos por la API.
 
