@@ -94,5 +94,7 @@ La app de escritorio se comunica directamente con los endpoints RESTful expuesto
 Ejemplos de consumo:
 
 /api/pacientes → Listado y búsqueda de pacientes
+
 /api/turnos/profesional/{id}/disponibilidad → Consulta de disponibilidad
+
 /api/turnos/reportes/turnos-atendidos → Informes por profesional
